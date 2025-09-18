@@ -1107,7 +1107,17 @@ $(document).ready(function() {
                 },
                 body: JSON.stringify({ items: items })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    throw new Error('Response is not JSON');
+                }
+            })
             .then(data => {
                 if (data.success) {
                     // Update order numbers in the UI

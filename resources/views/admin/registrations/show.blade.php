@@ -1194,7 +1194,17 @@ use Illuminate\Support\Facades\Storage;
                 },
                 body: JSON.stringify({ status: status })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    throw new Error('Response is not JSON');
+                }
+            })
             .then(data => {
                 if (data.success) {
                     location.reload();
@@ -1220,7 +1230,17 @@ use Illuminate\Support\Facades\Storage;
                 },
                 body: JSON.stringify({ status: status })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    throw new Error('Response is not JSON');
+                }
+            })
             .then(data => {
                 if (data.success) {
                     location.reload();
@@ -1245,7 +1265,17 @@ use Illuminate\Support\Facades\Storage;
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    throw new Error('Response is not JSON');
+                }
+            })
             .then(data => {
                 if (data.success) {
                     window.location.href = '/admin/registrations';
