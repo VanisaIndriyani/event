@@ -1186,35 +1186,96 @@ use Illuminate\Support\Facades\Storage;
     // Update payment status
     function updatePaymentStatus(paymentId, status) {
         if (confirm(`Are you sure you want to ${status} this payment?`)) {
+            // Show loading indicator
+            const originalButton = event.target;
+            const originalText = originalButton.textContent;
+            originalButton.textContent = 'Processing...';
+            originalButton.disabled = true;
+            
             fetch(`/admin/payments/${paymentId}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
-                body: JSON.stringify({ status: status })
+                body: JSON.stringify({ payment_status: status })
             })
             .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    // Try to get error message from response
+                    return response.text().then(text => {
+                        let errorMsg = `HTTP ${response.status}: ${response.statusText}`;
+                        try {
+                            const errorData = JSON.parse(text);
+                            if (errorData.message) {
+                                errorMsg += ` - ${errorData.message}`;
+                            }
+                        } catch (e) {
+                            if (text) {
+                                errorMsg += ` - ${text.substring(0, 200)}`;
+                            }
+                        }
+                        throw new Error(errorMsg);
+                    });
                 }
+                
                 const contentType = response.headers.get('content-type');
                 if (contentType && contentType.includes('application/json')) {
                     return response.json();
                 } else {
-                    throw new Error('Response is not JSON');
+                    return response.text().then(text => {
+                        throw new Error(`Expected JSON response but got: ${contentType}. Response: ${text.substring(0, 200)}`);
+                    });
                 }
             })
             .then(data => {
+                console.log('Success response:', data);
                 if (data.success) {
+                    alert('Payment status updated successfully!');
                     location.reload();
                 } else {
-                    alert('Error updating payment status');
+                    alert(`Error: ${data.message || 'Unknown error occurred'}`);
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Error updating payment status');
+                console.error('Detailed Error:', error);
+                
+                // Restore button state
+                originalButton.textContent = originalText;
+                originalButton.disabled = false;
+                
+                // Show detailed error message
+                let errorMessage = 'Error updating payment status:\n\n';
+                
+                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    errorMessage += '❌ CONNECTION REFUSED\n';
+                    errorMessage += '• Server Laravel tidak berjalan\n';
+                    errorMessage += '• Jalankan: php artisan serve\n';
+                    errorMessage += '• Atau cek apakah server di port yang benar\n\n';
+                    errorMessage += `Current URL: ${window.location.origin}/admin/payments/${paymentId}/status`;
+                } else if (error.message.includes('HTTP 404')) {
+                    errorMessage += '❌ ROUTE NOT FOUND\n';
+                    errorMessage += '• Route /admin/payments/{id}/status tidak ditemukan\n';
+                    errorMessage += '• Periksa file routes/web.php\n';
+                    errorMessage += '• Pastikan route terdaftar dengan benar';
+                } else if (error.message.includes('HTTP 419')) {
+                    errorMessage += '❌ CSRF TOKEN MISMATCH\n';
+                    errorMessage += '• CSRF token tidak valid atau expired\n';
+                    errorMessage += '• Refresh halaman dan coba lagi\n';
+                    errorMessage += '• Periksa meta tag csrf-token di layout';
+                } else if (error.message.includes('HTTP 500')) {
+                    errorMessage += '❌ SERVER ERROR\n';
+                    errorMessage += '• Ada error di server Laravel\n';
+                    errorMessage += '• Periksa storage/logs/laravel.log\n';
+                    errorMessage += '• Periksa konfigurasi database';
+                } else {
+                    errorMessage += `❌ UNKNOWN ERROR\n${error.message}`;
+                }
+                
+                alert(errorMessage);
             });
         }
     }
@@ -1222,6 +1283,12 @@ use Illuminate\Support\Facades\Storage;
     // Update registration status
     function updateStatus(id, status) {
         if (confirm(`Apakah Anda yakin ingin mengubah status menjadi ${status}?`)) {
+            // Show loading indicator
+            const originalButton = event.target;
+            const originalText = originalButton.textContent;
+            originalButton.textContent = 'Processing...';
+            originalButton.disabled = true;
+            
             fetch(`/admin/registrations/${id}/status`, {
                 method: 'PUT',
                 headers: {
@@ -1231,26 +1298,76 @@ use Illuminate\Support\Facades\Storage;
                 body: JSON.stringify({ status: status })
             })
             .then(response => {
+                console.log('Response status:', response.status);
+                
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.text().then(text => {
+                        let errorMsg = `HTTP ${response.status}: ${response.statusText}`;
+                        try {
+                            const errorData = JSON.parse(text);
+                            if (errorData.message) {
+                                errorMsg += ` - ${errorData.message}`;
+                            }
+                        } catch (e) {
+                            if (text) {
+                                errorMsg += ` - ${text.substring(0, 200)}`;
+                            }
+                        }
+                        throw new Error(errorMsg);
+                    });
                 }
+                
                 const contentType = response.headers.get('content-type');
                 if (contentType && contentType.includes('application/json')) {
                     return response.json();
                 } else {
-                    throw new Error('Response is not JSON');
+                    return response.text().then(text => {
+                        throw new Error(`Expected JSON but got: ${contentType}. Response: ${text.substring(0, 200)}`);
+                    });
                 }
             })
             .then(data => {
+                console.log('Success response:', data);
                 if (data.success) {
+                    alert('Status berhasil diupdate!');
                     location.reload();
                 } else {
-                    alert('Gagal mengupdate status');
+                    alert(`Error: ${data.message || 'Gagal mengupdate status'}`);
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan');
+                console.error('Detailed Error:', error);
+                
+                // Restore button state
+                originalButton.textContent = originalText;
+                originalButton.disabled = false;
+                
+                // Show detailed error message
+                let errorMessage = 'Error mengupdate status registrasi:\n\n';
+                
+                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
+                    errorMessage += '❌ KONEKSI DITOLAK\n';
+                    errorMessage += '• Server Laravel tidak berjalan\n';
+                    errorMessage += '• Jalankan: php artisan serve\n';
+                    errorMessage += '• Atau cek apakah server di port yang benar\n\n';
+                    errorMessage += `Current URL: ${window.location.origin}/admin/registrations/${id}/status`;
+                } else if (error.message.includes('HTTP 404')) {
+                    errorMessage += '❌ ROUTE TIDAK DITEMUKAN\n';
+                    errorMessage += '• Route /admin/registrations/{id}/status tidak ada\n';
+                    errorMessage += '• Periksa file routes/web.php';
+                } else if (error.message.includes('HTTP 419')) {
+                    errorMessage += '❌ CSRF TOKEN BERMASALAH\n';
+                    errorMessage += '• Token keamanan tidak valid\n';
+                    errorMessage += '• Refresh halaman dan coba lagi';
+                } else if (error.message.includes('HTTP 500')) {
+                    errorMessage += '❌ ERROR SERVER\n';
+                    errorMessage += '• Ada kesalahan di server\n';
+                    errorMessage += '• Periksa log error di storage/logs/';
+                } else {
+                    errorMessage += `❌ ERROR TIDAK DIKENAL\n${error.message}`;
+                }
+                
+                alert(errorMessage);
             });
         }
     }
