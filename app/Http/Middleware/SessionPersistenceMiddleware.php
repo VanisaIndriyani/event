@@ -48,32 +48,27 @@ class SessionPersistenceMiddleware
         
         // Set cookie dengan lifetime yang lebih panjang untuk session persistence
         if (Auth::check()) {
-            // Check if response is StreamedResponse
-            if ($response instanceof \Symfony\Component\HttpFoundation\StreamedResponse) {
-                // For StreamedResponse, set cookie using headers
-                $cookie = cookie(
-                    'laravel_session_persistent',
-                    $request->session()->getId(),
-                    1440, // 24 jam
-                    '/',
-                    null,
-                    false,
-                    true // httpOnly
-                );
+            $cookie = cookie(
+                'laravel_session_persistent',
+                $request->session()->getId(),
+                1440, // 24 jam
+                '/',
+                null,
+                false,
+                true // httpOnly
+            );
+            
+            // Check response type and handle accordingly
+            if ($response instanceof \Symfony\Component\HttpFoundation\StreamedResponse ||
+                $response instanceof \Symfony\Component\HttpFoundation\BinaryFileResponse) {
+                // For StreamedResponse and BinaryFileResponse, set cookie using headers
                 $response->headers->setCookie($cookie);
+            } elseif (method_exists($response, 'withCookie')) {
+                // For regular responses that support withCookie method
+                $response->withCookie($cookie);
             } else {
-                // For regular responses, use withCookie
-                $response->withCookie(
-                    cookie(
-                        'laravel_session_persistent',
-                        $request->session()->getId(),
-                        1440, // 24 jam
-                        '/',
-                        null,
-                        false,
-                        true // httpOnly
-                    )
-                );
+                // Fallback: set cookie using headers for any other response type
+                $response->headers->setCookie($cookie);
             }
         }
         

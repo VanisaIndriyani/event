@@ -1092,7 +1092,7 @@ use Illuminate\Support\Facades\Storage;
                             <div class="payment-details">
                                 <div class="payment-label">Proof of Payment</div>
                                 <div class="payment-value">
-                                    <a href="{{ Storage::url($registration->payment->payment_proof) }}" target="_blank" class="proof-link">
+                                    <a href="{{ Storage::disk('public_uploads')->url($registration->payment->payment_proof) }}" target="_blank" class="proof-link">
                                         <i class="fas fa-external-link-alt me-2"></i>View Payment Proof
                                     </a>
                                 </div>
@@ -1102,10 +1102,10 @@ use Illuminate\Support\Facades\Storage;
                         <!-- Payment Proof Image Preview -->
                         <div class="payment-proof-preview mt-3">
                             <div class="proof-image-container">
-                                <img src="{{ Storage::url($registration->payment->payment_proof) }}" 
+                                <img src="{{ Storage::disk('public_uploads')->url($registration->payment->payment_proof) }}" 
                                      alt="Payment Proof" 
                                      class="proof-image"
-                                     onclick="openImageModal({{ json_encode(Storage::url($registration->payment->payment_proof)) }})"
+                                     onclick="openImageModal({{ json_encode(Storage::disk('public_uploads')->url($registration->payment->payment_proof)) }})"
                                      onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
                                 <div class="proof-image-error" style="display: none;">
                                     <i class="fas fa-exclamation-triangle"></i>

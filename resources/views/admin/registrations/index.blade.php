@@ -288,7 +288,7 @@ use Illuminate\Support\Facades\Storage;
                         @if($registration->event->price > 0)
                             @if($registration->payment)
                                 @if($registration->payment->payment_proof)
-                                    <a href="{{ Storage::url($registration->payment->payment_proof) }}" target="_blank" class="btn btn-sm btn-outline-info" title="Lihat Bukti Transfer">
+                                    <a href="{{ Storage::disk('public_uploads')->url($registration->payment->payment_proof) }}" target="_blank" class="btn btn-sm btn-outline-info" title="Lihat Bukti Transfer">
                                         <i class="fas fa-eye"></i>
                                     </a>
                                 @else
