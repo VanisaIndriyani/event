@@ -17,35 +17,19 @@ class AdminMiddleware
     {
         // Cek apakah user sudah login
         if (!auth()->check()) {
-            // Cek apakah ada session yang masih valid
-            if ($request->session()->has('last_activity')) {
-                $lastActivity = $request->session()->get('last_activity');
-                $sessionLifetime = config('session.lifetime') * 60; // convert to seconds
-                
-                // Jika session masih dalam batas waktu, jangan logout
-                if (time() - $lastActivity < $sessionLifetime) {
-                    // Coba restore user dari session
-                    $userId = $request->session()->get('login_web_' . sha1('App\Models\User'));
-                    if ($userId) {
-                        auth()->loginUsingId($userId);
-                        $request->session()->put('last_activity', time());
-                    }
-                }
+            // Untuk AJAX request, return JSON response
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthenticated. Please login first.',
+                    'redirect' => route('login')
+                ], 401);
             }
-            
-            // Jika masih tidak bisa login
-            if (!auth()->check()) {
-                // Untuk AJAX request, return JSON response
-                if ($request->expectsJson() || $request->ajax()) {
-                    return response()->json([
-                        'success' => false,
-                        'message' => 'Unauthenticated. Please login first.',
-                        'redirect' => route('login')
-                    ], 401);
-                }
-                return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
-            }
+            return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
         }
+        
+        // Update last activity untuk mencegah session timeout
+        $request->session()->put('last_activity', time());
 
         if (auth()->user()->role !== 'admin') {
             // Untuk AJAX request, return JSON response
