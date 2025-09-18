@@ -33,13 +33,29 @@ class AdminMiddleware
                 }
             }
             
-            // Jika masih tidak bisa login, redirect ke login
+            // Jika masih tidak bisa login
             if (!auth()->check()) {
+                // Untuk AJAX request, return JSON response
+                if ($request->expectsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Unauthenticated. Please login first.',
+                        'redirect' => route('login')
+                    ], 401);
+                }
                 return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
             }
         }
 
         if (auth()->user()->role !== 'admin') {
+            // Untuk AJAX request, return JSON response
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Access denied. Admin privileges required.',
+                    'redirect' => route('home')
+                ], 403);
+            }
             return redirect()->route('home')->with('error', 'Akses ditolak. Anda tidak memiliki izin admin.');
         }
 

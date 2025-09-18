@@ -1192,11 +1192,20 @@ use Illuminate\Support\Facades\Storage;
             originalButton.textContent = 'Processing...';
             originalButton.disabled = true;
             
-            fetch(`/admin/payments/${paymentId}/status`, {
+            const url = `/admin/payments/${paymentId}/status`;
+            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+            console.log('Making request to:', url);
+            console.log('Method: PUT');
+            console.log('CSRF Token:', csrfToken);
+            console.log('Payload:', { status: status });
+            
+            fetch(url, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    'X-CSRF-TOKEN': csrfToken,
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ status: status })
             })
@@ -1208,16 +1217,36 @@ use Illuminate\Support\Facades\Storage;
                     // Try to get error message from response
                     return response.text().then(text => {
                         let errorMsg = `HTTP ${response.status}: ${response.statusText}`;
+                        let errorData = {};
+                        
                         try {
-                            const errorData = JSON.parse(text);
+                            errorData = JSON.parse(text);
                             if (errorData.message) {
-                                errorMsg += ` - ${errorData.message}`;
+                                errorMsg = errorData.message;
                             }
                         } catch (e) {
                             if (text) {
                                 errorMsg += ` - ${text.substring(0, 200)}`;
                             }
                         }
+                        
+                        // Handle authentication errors
+                        if (response.status === 401) {
+                            alert('Session expired. Redirecting to login...');
+                            if (errorData.redirect) {
+                                window.location.href = errorData.redirect;
+                            } else {
+                                window.location.href = '/login';
+                            }
+                            return;
+                        } else if (response.status === 403) {
+                            alert('Access denied. Admin privileges required.');
+                            if (errorData.redirect) {
+                                window.location.href = errorData.redirect;
+                            }
+                            return;
+                        }
+                        
                         throw new Error(errorMsg);
                     });
                 }
