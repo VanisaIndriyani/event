@@ -750,6 +750,17 @@ use Illuminate\Support\Facades\Storage;
         </div>
     </div>
     
+    <!-- Authentication Status Alert -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div id="auth-alert" class="alert alert-warning d-none" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <strong>Authentication Required:</strong> Please make sure you are logged in to use payment update features.
+                <a href="/login" class="alert-link ms-2">Login here</a>
+            </div>
+        </div>
+    </div>
+    
     <div class="row g-4">
         <div class="col-lg-6">
             <!-- Registration Summary Card -->
@@ -1187,13 +1198,21 @@ use Illuminate\Support\Facades\Storage;
     function updatePaymentStatus(paymentId, status) {
         if (confirm(`Are you sure you want to ${status} this payment?`)) {
             // Show loading indicator
+            // Check if user is authenticated first
+            const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+            if (!csrfTokenElement) {
+                alert('Authentication required. Please login first.');
+                window.location.href = '/login';
+                return;
+            }
+            
             const originalButton = event.target;
             const originalText = originalButton.textContent;
             originalButton.textContent = 'Processing...';
             originalButton.disabled = true;
             
             const url = `/admin/payments/${paymentId}/status`;
-            const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            const csrfToken = csrfTokenElement.getAttribute('content');
             
             console.log('Making request to:', url);
             console.log('Method: PUT');
@@ -1457,6 +1476,16 @@ use Illuminate\Support\Facades\Storage;
             }
         });
     }
+    
+    // Check authentication status on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
+        const authAlert = document.getElementById('auth-alert');
+        
+        if (!csrfTokenElement && authAlert) {
+            authAlert.classList.remove('d-none');
+        }
+    });
     
     function closeImageModal() {
         const modal = document.getElementById('imageModal');
