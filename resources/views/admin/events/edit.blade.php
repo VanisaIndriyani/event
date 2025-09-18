@@ -163,6 +163,79 @@
         border-radius: 8px;
         margin-top: 0.5rem;
     }
+    
+    .current-images-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    .current-image-item {
+        position: relative;
+    }
+    
+    .current-image-item .current-image {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-top: 0;
+    }
+    
+    .image-preview-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .image-preview-item {
+        position: relative;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 8px;
+        padding: 0.5rem;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .image-preview-item img {
+        width: 100%;
+        height: 120px;
+        object-fit: cover;
+        border-radius: 6px;
+        margin-bottom: 0.5rem;
+    }
+    
+    .image-preview-item .remove-btn {
+        position: absolute;
+        top: 0.25rem;
+        right: 0.25rem;
+        background: rgba(239, 68, 68, 0.9);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 0.75rem;
+        transition: all 0.2s ease;
+    }
+    
+    .image-preview-item .remove-btn:hover {
+        background: rgba(239, 68, 68, 1);
+        transform: scale(1.1);
+    }
+    
+    .image-preview-item .filename {
+        font-size: 0.75rem;
+        color: var(--text-gray);
+        text-align: center;
+        word-break: break-all;
+        line-height: 1.2;
+    }
 </style>
 @endpush
 
@@ -257,16 +330,41 @@
                         @enderror
                     </div>
                     
-                    <!-- Event Image -->
+                    <!-- Event Images -->
                     <div class="form-group full-width">
-                        <label class="form-label" for="image">Event Image</label>
-                        <input type="file" id="image" name="image" class="form-control" 
-                               accept="image/jpeg,image/png,image/jpg,image/gif">
-                        @if($event->image)
-                            <img src="{{ asset('storage/' . $event->image) }}" alt="Current Image" class="current-image">
-                            <p style="color: var(--text-gray); font-size: 0.85rem; margin-top: 0.5rem;">Current image (leave empty to keep current image)</p>
+                        <label class="form-label" for="images">Event Images</label>
+                        <input type="file" id="images" name="images[]" class="form-control" 
+                               accept="image/jpeg,image/png,image/jpg,image/gif" multiple onchange="previewImages(this)" max="5">
+                        
+                        <!-- Current Images -->
+                        @if($event->images && count($event->images) > 0)
+                            <div class="current-images-section">
+                                <p style="color: var(--text-gray); font-size: 0.85rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">Current images:</p>
+                                <div class="current-images-grid">
+                                    @foreach($event->images as $image)
+                                        <div class="current-image-item">
+                                            <img src="{{ asset('storage/' . $image) }}" alt="Current Image" class="current-image">
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
+                        @elseif($event->image)
+                            <div class="current-images-section">
+                                <p style="color: var(--text-gray); font-size: 0.85rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">Current image:</p>
+                                <img src="{{ asset('storage/' . $event->image) }}" alt="Current Image" class="current-image">
+                            </div>
                         @endif
-                        @error('image')
+                        
+                        <!-- Image Preview Container -->
+                        <div id="imagePreviewContainer" class="image-preview-container"></div>
+                        
+                        <small class="text-white">Supported formats: JPEG, PNG, JPG, GIF. Max size: 2MB per image. Maximum 5 images allowed.</small>
+                        <small class="text-white" style="display: block; margin-top: 0.25rem;">Leave empty to keep current images.</small>
+                        
+                        @error('images')
+                            <div class="error-message">{{ $message }}</div>
+                        @enderror
+                        @error('images.*')
                             <div class="error-message">{{ $message }}</div>
                         @enderror
                     </div>
@@ -287,4 +385,56 @@
         </div>
     </div>
 </div>
+
+<script>
+let selectedFiles = [];
+
+function previewImages(input) {
+    const container = document.getElementById('imagePreviewContainer');
+    container.innerHTML = '';
+    selectedFiles = [];
+    
+    if (input.files && input.files.length > 0) {
+        if (input.files.length > 5) {
+            alert('Maksimal 5 foto yang dapat diupload!');
+            input.value = '';
+            return;
+        }
+        
+        Array.from(input.files).forEach((file, index) => {
+            selectedFiles.push(file);
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const previewItem = document.createElement('div');
+                previewItem.className = 'image-preview-item';
+                previewItem.innerHTML = `
+                    <button type="button" class="remove-btn" onclick="removeImage(${index})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <img src="${e.target.result}" alt="Preview">
+                    <div class="filename">${file.name}</div>
+                `;
+                container.appendChild(previewItem);
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+}
+
+function removeImage(index) {
+    selectedFiles.splice(index, 1);
+    
+    // Create new FileList from remaining files
+    const dt = new DataTransfer();
+    selectedFiles.forEach(file => dt.items.add(file));
+    
+    const input = document.getElementById('images');
+    input.files = dt.files;
+    
+    // Refresh preview
+    previewImages(input);
+}
+</script>
+
 @endsection

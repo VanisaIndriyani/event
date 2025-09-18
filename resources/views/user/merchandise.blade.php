@@ -464,9 +464,7 @@
                                     <i class="fas fa-times"></i>Out of Stock
                                 </button>
                             @endif
-                            <a href="#" class="btn-secondary">
-                                <i class="fas fa-heart"></i>
-                            </a>
+                         
                         </div>
                     </div>
                 </div>
@@ -525,17 +523,31 @@
 
 <script>
 function orderViaWhatsApp(itemName, price, size) {
+    console.log('orderViaWhatsApp called with:', itemName, price, size);
+    
     const message = `Hi! I would like to order:\n\n` +
                    `Item: ${itemName}\n` +
                    `Price: ${price}\n` +
                    `Size/Variant: ${size}\n\n` +
                    `Please let me know the next steps for payment and delivery. Thank you!`;
     
-    const whatsappNumber = '6281996850538'; // Replace with actual WhatsApp number
+    const whatsappNumber = '62895363334689'; // Replace with actual WhatsApp number
     const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
     
-    window.open(whatsappUrl, '_blank');
+    console.log('Opening WhatsApp URL:', whatsappUrl);
+    
+    // Try to open WhatsApp
+    const opened = window.open(whatsappUrl, '_blank');
+    
+    if (!opened) {
+        alert('Pop-up blocked! Please allow pop-ups for this site or copy this link: ' + whatsappUrl);
+    }
 }
+
+// Test function availability on page load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Merchandise page loaded, orderViaWhatsApp function available:', typeof orderViaWhatsApp === 'function');
+});
 </script>
 
 @endsection

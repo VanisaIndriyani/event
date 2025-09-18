@@ -16,6 +16,7 @@ class Event extends Model
         'event_date',
         'location',
         'image',
+        'images',
         'price',
         'max_participants',
         'status',
@@ -26,6 +27,7 @@ class Event extends Model
         'event_date' => 'datetime',
         'price' => 'decimal:2',
         'is_active' => 'boolean',
+        'images' => 'array',
     ];
 
     public function registrations()

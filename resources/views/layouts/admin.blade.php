@@ -372,12 +372,7 @@
                             Events
                         </a>
                     </div>
-                    <div class="nav-item">
-                        <a href="{{ route('admin.form-fields.index') }}" class="nav-link {{ request()->routeIs('admin.form-fields.*') ? 'active' : '' }}">
-                            <i class="fas fa-wpforms"></i>
-                            Form Fields
-                        </a>
-                    </div>
+                   
                     <div class="nav-item">
                         <a href="{{ route('admin.merchandise.index') }}" class="nav-link {{ request()->routeIs('admin.merchandise.*') ? 'active' : '' }}">
                             <i class="fas fa-shopping-bag"></i>

@@ -99,6 +99,72 @@
         opacity: 0.8;
     }
     
+    /* Image Preview Styles */
+    .image-preview-container {
+        margin-top: 1rem;
+    }
+    
+    .preview-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 1rem;
+    }
+    
+    .preview-item {
+        position: relative;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        overflow: hidden;
+        aspect-ratio: 1;
+    }
+    
+    .preview-image {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    
+    .preview-remove {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: rgba(220, 53, 69, 0.8);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 25px;
+        height: 25px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .preview-remove:hover {
+        background: rgba(220, 53, 69, 1);
+        transform: scale(1.1);
+    }
+    
+    .preview-filename {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.7);
+        color: white;
+        padding: 5px;
+        font-size: 11px;
+        text-align: center;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+    
     .form-control::-moz-placeholder {
         color: #94A3B8;
         opacity: 0.8;
@@ -304,16 +370,24 @@
             </div>
             
             <div class="form-group">
-                <label for="image" class="form-label">Event Image</label>
+                <label for="images" class="form-label">Event Images</label>
                 <input type="file" 
-                       class="form-control @error('image') is-invalid @enderror" 
-                       id="image" 
-                       name="image" 
-                       accept="image/*">
-                @error('image')
+                       class="form-control @error('images') is-invalid @enderror" 
+                       id="images" 
+                       name="images[]" 
+                       accept="image/*"
+                       multiple
+                       onchange="previewImages(this)"
+                       max="5">
+                @error('images')
                     <div class="invalid-feedback">{{ $message }}</div>
                 @enderror
-                <small class="text-muted">Supported formats: JPEG, PNG, JPG, GIF. Max size: 2MB</small>
+                <small class="text-white">Supported formats: JPEG, PNG, JPG, GIF. Max size: 2MB per image. Maximum 5 images allowed.</small>
+                
+                <!-- Image Preview Container -->
+                <div id="imagePreviewContainer" class="image-preview-container mt-3" style="display: none;">
+                    <div class="preview-grid" id="previewGrid"></div>
+                </div>
             </div>
             
             <div class="btn-group">
@@ -329,4 +403,66 @@
         </form>
     </div>
 </div>
+
+<script>
+let selectedFiles = [];
+
+function previewImages(input) {
+    const previewContainer = document.getElementById('imagePreviewContainer');
+    const previewGrid = document.getElementById('previewGrid');
+    
+    if (input.files && input.files.length > 0) {
+        if (input.files.length > 5) {
+            alert('Maksimal 5 foto yang dapat diupload!');
+            input.value = '';
+            return;
+        }
+        
+        selectedFiles = Array.from(input.files);
+        previewGrid.innerHTML = '';
+        previewContainer.style.display = 'block';
+        
+        selectedFiles.forEach((file, index) => {
+            if (file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    const previewItem = document.createElement('div');
+                    previewItem.className = 'preview-item';
+                    previewItem.innerHTML = `
+                        <img src="${e.target.result}" alt="Preview" class="preview-image">
+                        <button type="button" class="preview-remove" onclick="removeImage(${index})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="preview-filename">${file.name}</div>
+                    `;
+                    previewGrid.appendChild(previewItem);
+                };
+                
+                reader.readAsDataURL(file);
+            }
+        });
+    } else {
+        previewContainer.style.display = 'none';
+        selectedFiles = [];
+    }
+}
+
+function removeImage(index) {
+    selectedFiles.splice(index, 1);
+    
+    // Update the file input
+    const input = document.getElementById('images');
+    const dt = new DataTransfer();
+    selectedFiles.forEach(file => dt.items.add(file));
+    input.files = dt.files;
+    
+    // Refresh preview
+    if (selectedFiles.length > 0) {
+        previewImages(input);
+    } else {
+        document.getElementById('imagePreviewContainer').style.display = 'none';
+    }
+}
+</script>
 @endsection

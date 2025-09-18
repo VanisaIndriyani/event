@@ -87,6 +87,25 @@
         border: 2px solid rgba(255, 255, 255, 0.3);
         margin-top: 10px;
     }
+    
+    /* Special styling for select dropdown */
+    select.form-control {
+        background: rgba(0, 0, 0, 0.6) !important;
+        color: #fff !important;
+    }
+    
+    select.form-control option {
+        background: rgba(0, 0, 0, 0.9) !important;
+        color: #fff !important;
+        padding: 8px;
+    }
+    
+    select.form-control:focus {
+        background: rgba(0, 0, 0, 0.7) !important;
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        color: #fff !important;
+    }
 </style>
 @endpush
 

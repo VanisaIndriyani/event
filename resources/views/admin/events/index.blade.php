@@ -519,7 +519,9 @@
             @forelse($events as $event)
                 <div class="event-card">
                     <div class="event-image">
-                        @if($event->image)
+                        @if($event->images && count($event->images) > 0)
+                            <img src="{{ asset('storage/' . $event->images[0]) }}" alt="{{ $event->title }}" style="width: 100%; height: 100%; object-fit: cover;">
+                        @elseif($event->image)
                             <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->title }}" style="width: 100%; height: 100%; object-fit: cover;">
                         @else
                             <i class="fas fa-calendar-alt"></i>

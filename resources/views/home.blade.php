@@ -226,37 +226,7 @@
     </div>
 </section>
 
-<!-- Stats Section -->
-<section class="stats-section">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-3 col-6">
-                <div class="stat-card">
-                    <span class="stat-number">{{ $featuredEvents->count() }}+</span>
-                    <div class="stat-label">Upcoming Events</div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="stat-card">
-                    <span class="stat-number">1000+</span>
-                    <div class="stat-label">Happy Clients</div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="stat-card">
-                    <span class="stat-number">50+</span>
-                    <div class="stat-label">Events Completed</div>
-                </div>
-            </div>
-            <div class="col-md-3 col-6">
-                <div class="stat-card">
-                    <span class="stat-number">{{ $featuredMerchandise->count() }}+</span>
-                    <div class="stat-label">Merchandise Items</div>
-                </div>
-            </div>
-        </div>
-    </div>
-</section>
+
 
 <!-- Featured Events -->
 @if($featuredEvents->count() > 0)
@@ -267,7 +237,9 @@
             @foreach($featuredEvents as $event)
             <div class="col-lg-4 col-md-6">
                 <div class="card h-100 event-card border-0">
-                    @if($event->image)
+                    @if($event->images && count($event->images) > 0)
+                        <img src="{{ asset('storage/' . $event->images[0]) }}" alt="{{ $event->title }}" class="card-img-top event-image">
+                    @elseif($event->image)
                         <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->title }}" class="card-img-top event-image">
                     @else
                         <div class="card-img-top event-image d-flex align-items-center justify-content-center">

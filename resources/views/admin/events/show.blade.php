@@ -285,7 +285,9 @@
         <div class="event-container">
             <!-- Main Content -->
             <div class="event-main">
-                @if($event->image)
+                @if($event->images && count($event->images) > 0)
+                    <img src="{{ asset('storage/' . $event->images[0]) }}" alt="{{ $event->title }}" class="event-image">
+                @elseif($event->image)
                     <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->title }}" class="event-image">
                 @endif
                 

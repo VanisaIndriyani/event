@@ -77,7 +77,11 @@
                             <p>{{ $event->registrations_count }} registrations</p>
                         </div>
                         <div class="event-progress">
-                            <div class="progress-bar" style="width: {{ ($event->registrations_count / max($popularEvents->pluck('registrations_count')->toArray())) * 100 }}%"></div>
+                            @php
+                                $maxRegistrations = max($popularEvents->pluck('registrations_count')->toArray());
+                                $progressWidth = $maxRegistrations > 0 ? ($event->registrations_count / $maxRegistrations) * 100 : 0;
+                            @endphp
+                            <div class="progress-bar" style="width: {{ $progressWidth }}%"></div>
                         </div>
                     </div>
                 @empty

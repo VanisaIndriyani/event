@@ -350,27 +350,7 @@
             <p class="page-subtitle">Relive the magic through our collection of epic moments and memories</p>
         </div>
         
-        <!-- Stats Section -->
-        <div class="stats-section">
-            <div class="stats-grid">
-                <div class="stat-item">
-                    <div class="stat-number">150+</div>
-                    <div class="stat-label">Events Captured</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">5000+</div>
-                    <div class="stat-label">Photos Taken</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">50K+</div>
-                    <div class="stat-label">Happy Participants</div>
-                </div>
-                <div class="stat-item">
-                    <div class="stat-number">3</div>
-                    <div class="stat-label">Years of Epic</div>
-                </div>
-            </div>
-        </div>
+      
         
         <!-- Filters -->
         <div class="filters-section">
@@ -457,9 +437,9 @@
             @else
                 <div class="col-12 text-center py-5">
                     <div class="empty-state">
-                        <i class="fas fa-images fa-4x text-muted mb-3"></i>
-                        <h4 class="text-muted">No Portfolio Available</h4>
-                        <p class="text-muted">There are no past events to display in the portfolio yet.</p>
+                        <i class="fas fa-images fa-4x text-white mb-3"></i>
+                        <h4 class="text-white">No Portfolio Available</h4>
+                        <p class="text-white">There are no past events to display in the portfolio yet.</p>
                     </div>
                 </div>
             @endif

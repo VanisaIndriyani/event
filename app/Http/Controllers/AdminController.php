@@ -156,14 +156,20 @@ class AdminController extends Controller
             'location' => 'required|string|max:255',
             'max_participants' => 'nullable|integer|min:1',
             'price' => 'nullable|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images' => 'nullable|array|max:5',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         $data = $request->all();
         $data['is_active'] = true;
         
-        if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('events', 'public');
+        // Handle multiple image uploads
+        if ($request->hasFile('images')) {
+            $imagePaths = [];
+            foreach ($request->file('images') as $image) {
+                $imagePaths[] = $image->store('events', 'public');
+            }
+            $data['images'] = $imagePaths;
         }
 
         Event::create($data);
@@ -194,7 +200,8 @@ class AdminController extends Controller
             'location' => 'required|string|max:255',
             'max_participants' => 'nullable|integer|min:1',
             'price' => 'nullable|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'images' => 'nullable|array|max:5',
+            'images.*' => 'image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_active' => 'boolean',
         ]);
 
@@ -206,11 +213,23 @@ class AdminController extends Controller
         // Handle boolean conversion for is_active
         $data['is_active'] = $request->input('is_active', 0) == 1;
         
-        if ($request->hasFile('image')) {
-            if ($event->image) {
+        // Handle multiple image uploads
+        if ($request->hasFile('images')) {
+            // Delete old images if they exist
+            if ($event->images && is_array($event->images)) {
+                foreach ($event->images as $oldImage) {
+                    Storage::disk('public')->delete($oldImage);
+                }
+            } elseif ($event->image) {
                 Storage::disk('public')->delete($event->image);
             }
-            $data['image'] = $request->file('image')->store('events', 'public');
+            
+            $imagePaths = [];
+            foreach ($request->file('images') as $image) {
+                $imagePaths[] = $image->store('events', 'public');
+            }
+            $data['images'] = $imagePaths;
+            $data['image'] = null; // Clear old single image field
         }
 
         $event->update($data);

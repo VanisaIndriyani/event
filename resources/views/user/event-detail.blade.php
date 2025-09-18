@@ -391,7 +391,9 @@
     </a>
     
     <div class="event-hero">
-        @if($event->image)
+        @if($event->images && count($event->images) > 0)
+            <img src="{{ asset('storage/' . $event->images[0]) }}" alt="{{ $event->title }}" class="event-image">
+        @elseif($event->image)
             <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->title }}" class="event-image">
         @else
             <div class="event-image-placeholder">
@@ -495,7 +497,7 @@
                             <div class="participants-fill" style="width: {{ $percentage }}%"></div>
                         </div>
                         @if($event->available_slots !== null)
-                            <small class="text-muted mt-1 d-block">
+                            <small class="text-white mt-1 d-block">
                                 {{ $event->available_slots }} slots remaining
                             </small>
                         @endif
@@ -522,7 +524,7 @@
                             Event Full
                         </button>
                     @else
-                        <form action="{{ route('events.register', $event->id) }}" method="POST">
+                        <form action="{{ route('event.register', $event->id) }}" method="POST">
                             @csrf
                             <button type="submit" class="btn-register">
                                 <i class="fas fa-calendar-plus"></i>

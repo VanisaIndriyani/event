@@ -396,7 +396,9 @@
                 @foreach($events as $event)
                     <div class="col-lg-4 col-md-6">
                         <div class="card h-100 event-card border-0">
-                            @if($event->image)
+                            @if($event->images && count($event->images) > 0)
+                                <img src="{{ asset('storage/' . $event->images[0]) }}" alt="{{ $event->title }}" class="card-img-top event-image">
+                            @elseif($event->image)
                                 <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->title }}" class="card-img-top event-image">
                             @else
                                 <div class="card-img-top event-image d-flex align-items-center justify-content-center">
@@ -433,7 +435,7 @@
                                 </p>
                                 
                                 <div class="d-flex justify-content-between align-items-center mb-3">
-                                    <small class="text-muted event-location">
+                                    <small class="text-white event-location">
                                         <i class="fas fa-map-marker-alt me-1"></i>
                                         {{ $event->location }}
                                     </small>
@@ -446,17 +448,17 @@
                                     @endif
                                 </div>
                                 
-                                <div class="d-flex gap-2 mt-auto">
-                                    <a href="{{ route('event.detail', $event->id ?? 1) }}" class="btn btn-primary flex-fill">
-                                        <i class="fas fa-info-circle me-1"></i>Details
+                                <div class="d-flex gap-2 mt-auto justify-content-center">
+                                    <a href="{{ route('event.detail', $event->id ?? 1) }}" class="btn btn-primary btn-sm">
+                                        <i class="fas fa-eye me-1"></i>Details
                                     </a>
                                     @auth
-                                        <a href="{{ route('event.registration.form', $event->id ?? 1) }}" class="btn btn-outline-primary w-100">
-                                            <i class="fas fa-ticket-alt me-1"></i>Daftar
+                                        <a href="{{ route('event.registration.form', $event->id ?? 1) }}" class="btn btn-outline-primary btn-sm">
+                                            <i class="fas fa-user-plus me-1"></i>Daftar
                                         </a>
                                     @else
-                                        <button type="button" class="btn btn-outline-primary w-100" onclick="showLoginModal()">
-                                            <i class="fas fa-ticket-alt me-1"></i>Daftar
+                                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="showLoginModal()">
+                                            <i class="fas fa-user-plus me-1"></i>Daftar
                                         </button>
                                     @endauth
                                 </div>
