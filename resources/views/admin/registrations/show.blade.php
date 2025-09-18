@@ -1150,12 +1150,22 @@ use Illuminate\Support\Facades\Storage;
                         @if($registration->payment->payment_status === 'pending')
                         <div class="payment-actions mt-4">
                             <div class="d-grid gap-2">
-                                <button class="btn btn-success" onclick="updatePaymentStatus({{ $registration->payment->id }}, 'verified')">
-                                    <i class="fas fa-check me-2"></i>Verify Payment
-                                </button>
-                                <button class="btn btn-danger" onclick="updatePaymentStatus({{ $registration->payment->id }}, 'rejected')">
-                                    <i class="fas fa-times me-2"></i>Reject Payment
-                                </button>
+                                <form action="{{ route('admin.payments.updateStatus', $registration->payment->id) }}" method="POST" style="display: inline;">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="status" value="verified">
+                                    <button type="submit" class="btn btn-success" onclick="return confirm('Are you sure you want to verify this payment?')">
+                                        <i class="fas fa-check me-2"></i>Verify Payment
+                                    </button>
+                                </form>
+                                <form action="{{ route('admin.payments.updateStatus', $registration->payment->id) }}" method="POST" style="display: inline;">
+                                    @csrf
+                                    @method('PUT')
+                                    <input type="hidden" name="status" value="rejected">
+                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to reject this payment?')">
+                                        <i class="fas fa-times me-2"></i>Reject Payment
+                                    </button>
+                                </form>
                             </div>
                         </div>
                         @endif
@@ -1194,367 +1204,36 @@ use Illuminate\Support\Facades\Storage;
 
 @push('scripts')
 <script>
-    // Update payment status
-    function updatePaymentStatus(paymentId, status) {
-        if (confirm(`Are you sure you want to ${status} this payment?`)) {
-            // Show loading indicator
-            // Check if user is authenticated first
-            const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
-            if (!csrfTokenElement) {
-                const currentHost = window.location.host;
-                let loginUrl = '/login';
-                
-                if (currentHost.includes('lark.today')) {
-                    loginUrl = 'https://lark.today/event/public/login';
-                }
-                
-                alert(`Authentication required. You need to login first to update payment status.\n\nYou will be redirected to the login page.`);
-                window.location.href = loginUrl;
-                return;
-            }
-            
-            const originalButton = event.target;
-            const originalText = originalButton.textContent;
-            originalButton.textContent = 'Processing...';
-            originalButton.disabled = true;
-            
-            const url = `/admin/payments/${paymentId}/status`;
-            const csrfToken = csrfTokenElement.getAttribute('content');
-            
-            console.log('=== DEBUG INFO ===');
-            console.log('Making request to:', url);
-            console.log('Method: PUT');
-            console.log('CSRF Token:', csrfToken);
-            console.log('Payload:', { status: status });
-            console.log('Current URL:', window.location.href);
-            console.log('User Agent:', navigator.userAgent);
-            console.log('==================');
-            
-            fetch(url, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': csrfToken,
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify({ status: status })
-            })
-            .then(response => {
-                console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
-                
-                if (!response.ok) {
-                    // Try to get error message from response
-                    return response.text().then(text => {
-                        let errorMsg = `HTTP ${response.status}: ${response.statusText}`;
-                        let errorData = {};
-                        
-                        try {
-                            errorData = JSON.parse(text);
-                            if (errorData.message) {
-                                errorMsg = errorData.message;
-                            }
-                        } catch (e) {
-                            if (text) {
-                                errorMsg += ` - ${text.substring(0, 200)}`;
-                            }
-                        }
-                        
-                        // Handle authentication errors
-                        if (response.status === 401) {
-                            const currentHost = window.location.host;
-                            let loginUrl = '/login';
-                            
-                            if (currentHost.includes('lark.today')) {
-                                loginUrl = 'https://lark.today/event/public/login';
-                            }
-                            
-                            alert('Session expired or not authenticated. You need to login first.\n\nRedirecting to login page...');
-                            if (errorData.redirect) {
-                                window.location.href = errorData.redirect;
-                            } else {
-                                window.location.href = loginUrl;
-                            }
-                            return;
-                        } else if (response.status === 403) {
-                            alert('Access denied. Admin privileges required.');
-                            if (errorData.redirect) {
-                                window.location.href = errorData.redirect;
-                            }
-                            return;
-                        } else if (response.status === 405) {
-                            alert('Method Not Allowed Error (405).\n\nThis usually means:\n1. You are not logged in as admin\n2. The route configuration has issues\n\nPlease login first and try again.');
-                            const currentHost = window.location.host;
-                            let loginUrl = '/login';
-                            
-                            if (currentHost.includes('lark.today')) {
-                                loginUrl = 'https://lark.today/event/public/login';
-                            }
-                            
-                            setTimeout(() => {
-                                window.location.href = loginUrl;
-                            }, 3000);
-                            return;
-                        }
-                        
-                        throw new Error(errorMsg);
-                    });
-                }
-                
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    return response.json();
-                } else {
-                    return response.text().then(text => {
-                        throw new Error(`Expected JSON response but got: ${contentType}. Response: ${text.substring(0, 200)}`);
-                    });
-                }
-            })
-            .then(data => {
-                console.log('Success response:', data);
-                if (data.success) {
-                    alert('Payment status updated successfully!');
-                    location.reload();
-                } else {
-                    alert(`Error: ${data.message || 'Unknown error occurred'}`);
-                }
-            })
-            .catch(error => {
-                console.error('Detailed Error:', error);
-                
-                // Restore button state
-                originalButton.textContent = originalText;
-                originalButton.disabled = false;
-                
-                // Show detailed error message
-                let errorMessage = 'Error updating payment status:\n\n';
-                
-                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                    errorMessage += '❌ CONNECTION REFUSED\n';
-                    errorMessage += '• Server Laravel tidak berjalan\n';
-                    errorMessage += '• Jalankan: php artisan serve\n';
-                    errorMessage += '• Atau cek apakah server di port yang benar\n\n';
-                    errorMessage += `Current URL: ${window.location.origin}/admin/payments/${paymentId}/status`;
-                } else if (error.message.includes('HTTP 404')) {
-                    errorMessage += '❌ ROUTE NOT FOUND\n';
-                    errorMessage += '• Route /admin/payments/{id}/status tidak ditemukan\n';
-                    errorMessage += '• Periksa file routes/web.php\n';
-                    errorMessage += '• Pastikan route terdaftar dengan benar';
-                } else if (error.message.includes('HTTP 419')) {
-                    errorMessage += '❌ CSRF TOKEN MISMATCH\n';
-                    errorMessage += '• CSRF token tidak valid atau expired\n';
-                    errorMessage += '• Refresh halaman dan coba lagi\n';
-                    errorMessage += '• Periksa meta tag csrf-token di layout';
-                } else if (error.message.includes('HTTP 500')) {
-                    errorMessage += '❌ SERVER ERROR\n';
-                    errorMessage += '• Ada error di server Laravel\n';
-                    errorMessage += '• Periksa storage/logs/laravel.log\n';
-                    errorMessage += '• Periksa konfigurasi database';
-                } else {
-                    errorMessage += `❌ UNKNOWN ERROR\n${error.message}`;
-                }
-                
-                alert(errorMessage);
-            });
-        }
-    }
-    
-    // Update registration status
-    function updateStatus(id, status) {
-        if (confirm(`Apakah Anda yakin ingin mengubah status menjadi ${status}?`)) {
-            // Show loading indicator
-            const originalButton = event.target;
-            const originalText = originalButton.textContent;
-            originalButton.textContent = 'Processing...';
-            originalButton.disabled = true;
-            
-            fetch(`/admin/registrations/${id}/status`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ status: status })
-            })
-            .then(response => {
-                console.log('Response status:', response.status);
-                
-                if (!response.ok) {
-                    return response.text().then(text => {
-                        let errorMsg = `HTTP ${response.status}: ${response.statusText}`;
-                        try {
-                            const errorData = JSON.parse(text);
-                            if (errorData.message) {
-                                errorMsg += ` - ${errorData.message}`;
-                            }
-                        } catch (e) {
-                            if (text) {
-                                errorMsg += ` - ${text.substring(0, 200)}`;
-                            }
-                        }
-                        throw new Error(errorMsg);
-                    });
-                }
-                
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    return response.json();
-                } else {
-                    return response.text().then(text => {
-                        throw new Error(`Expected JSON but got: ${contentType}. Response: ${text.substring(0, 200)}`);
-                    });
-                }
-            })
-            .then(data => {
-                console.log('Success response:', data);
-                if (data.success) {
-                    alert('Status berhasil diupdate!');
-                    location.reload();
-                } else {
-                    alert(`Error: ${data.message || 'Gagal mengupdate status'}`);
-                }
-            })
-            .catch(error => {
-                console.error('Detailed Error:', error);
-                
-                // Restore button state
-                originalButton.textContent = originalText;
-                originalButton.disabled = false;
-                
-                // Show detailed error message
-                let errorMessage = 'Error mengupdate status registrasi:\n\n';
-                
-                if (error.name === 'TypeError' && error.message.includes('Failed to fetch')) {
-                    errorMessage += '❌ KONEKSI DITOLAK\n';
-                    errorMessage += '• Server Laravel tidak berjalan\n';
-                    errorMessage += '• Jalankan: php artisan serve\n';
-                    errorMessage += '• Atau cek apakah server di port yang benar\n\n';
-                    errorMessage += `Current URL: ${window.location.origin}/admin/registrations/${id}/status`;
-                } else if (error.message.includes('HTTP 404')) {
-                    errorMessage += '❌ ROUTE TIDAK DITEMUKAN\n';
-                    errorMessage += '• Route /admin/registrations/{id}/status tidak ada\n';
-                    errorMessage += '• Periksa file routes/web.php';
-                } else if (error.message.includes('HTTP 419')) {
-                    errorMessage += '❌ CSRF TOKEN BERMASALAH\n';
-                    errorMessage += '• Token keamanan tidak valid\n';
-                    errorMessage += '• Refresh halaman dan coba lagi';
-                } else if (error.message.includes('HTTP 500')) {
-                    errorMessage += '❌ ERROR SERVER\n';
-                    errorMessage += '• Ada kesalahan di server\n';
-                    errorMessage += '• Periksa log error di storage/logs/';
-                } else {
-                    errorMessage += `❌ ERROR TIDAK DIKENAL\n${error.message}`;
-                }
-                
-                alert(errorMessage);
-            });
-        }
-    }
-
-    // Delete registration
-    function deleteRegistration(id) {
-        if (confirm('Apakah Anda yakin ingin menghapus registrasi ini?')) {
-            fetch(`/admin/registrations/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                }
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    return response.json();
-                } else {
-                    throw new Error('Response is not JSON');
-                }
-            })
-            .then(data => {
-                if (data.success) {
-                    window.location.href = '/admin/registrations';
-                } else {
-                    alert('Gagal menghapus registrasi');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan');
-            });
-        }
-    }
-    
     // Image modal functions
     function openImageModal(imageSrc) {
         const modal = document.getElementById('imageModal');
         const modalImg = document.getElementById('modalImage');
         modal.style.display = 'block';
         modalImg.src = imageSrc;
-        
-        // Close modal when clicking outside the image
-        modal.onclick = function(event) {
-            if (event.target === modal) {
-                closeImageModal();
-            }
-        }
-        
-        // Close modal with Escape key
-        document.addEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeImageModal();
-            }
-        });
     }
-    
-    // Check authentication status on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
-        const authAlert = document.getElementById('auth-alert');
-        
-        if (!csrfTokenElement && authAlert) {
-            authAlert.classList.remove('d-none');
-        }
-        
-        // Session keep-alive mechanism untuk mencegah logout otomatis
-        setInterval(function() {
-            fetch('/admin/ping', {
-                method: 'GET',
-                credentials: 'same-origin',
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
-                }
-            }).then(function(response) {
-                if (response.status === 401) {
-                    // Session expired, redirect to login
-                    console.log('Session expired, redirecting to login');
-                    const currentHost = window.location.hostname;
-                    if (currentHost.includes('lark.today')) {
-                        window.location.href = 'https://lark.today/event/public/login';
-                    } else {
-                        window.location.href = '/login';
-                    }
-                } else if (response.ok) {
-                    console.log('Session keep-alive successful');
-                }
-            }).catch(function(error) {
-                console.log('Session keep-alive failed:', error);
-            });
-        }, 300000); // Ping setiap 5 menit (300000ms)
-    });
     
     function closeImageModal() {
-        const modal = document.getElementById('imageModal');
-        modal.style.display = 'none';
-        
-        // Remove event listeners
-        document.removeEventListener('keydown', function(event) {
-            if (event.key === 'Escape') {
-                closeImageModal();
-            }
-        });
+        document.getElementById('imageModal').style.display = 'none';
     }
+    
+    // Close modal when clicking outside the image
+    window.onclick = function(event) {
+        const modal = document.getElementById('imageModal');
+        if (event.target == modal) {
+            modal.style.display = 'none';
+        }
+    }
+    
+    // Session keep-alive (ping every 5 minutes)
+    setInterval(function() {
+        fetch('/admin/ping', {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        }).catch(function(error) {
+            console.log('Keep-alive ping failed:', error);
+        });
+    }, 300000); // 5 minutes
 </script>
 @endpush
