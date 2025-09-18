@@ -1198,7 +1198,7 @@ use Illuminate\Support\Facades\Storage;
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 },
-                body: JSON.stringify({ payment_status: status })
+                body: JSON.stringify({ status: status })
             })
             .then(response => {
                 console.log('Response status:', response.status);
