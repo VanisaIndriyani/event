@@ -528,7 +528,7 @@
 </style>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 let paymentSectionIndex = {{ count($paymentSections) }};
 
@@ -614,6 +614,7 @@ function updateSectionNumbers() {
         if (header) {
             header.textContent = `Bagian ${index + 1}`;
         }
+        section.setAttribute('data-index', index);
     });
 }
 
@@ -645,4 +646,4 @@ document.getElementById('qr_code').addEventListener('change', function(e) {
     }
 });
 </script>
-@endsection
+@endpush

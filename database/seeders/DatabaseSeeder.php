@@ -28,6 +28,7 @@ class DatabaseSeeder extends Seeder
             PaymentMethodSeeder::class,
             UserSeeder::class,
             AdminSeeder::class,
+            SettingsSeeder::class,
         ]);
     }
 }
