@@ -309,7 +309,7 @@ use Illuminate\Support\Facades\Storage;
                                         <button class="btn btn-action btn-email" title="Send Email Notification" onclick="sendEmailNotification({{ json_encode($registration->user->email) }}, {{ json_encode($registration->user->name) }}, {{ json_encode($registration->event->title) }}, {{ json_encode($registration->status) }}, {{ $registration->id }})" style="background: linear-gradient(135deg, #007bff, #0056b3); color: white; border: none; margin: 0 2px;">
                                             <i class="fas fa-envelope"></i>
                                         </button>
-                      
+                        @endif
                         <button class="btn btn-action btn-delete" title="Delete" onclick="deleteRegistration({{ $registration->id }})">
                             <i class="fas fa-trash"></i>
                         </button>
