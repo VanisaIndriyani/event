@@ -279,45 +279,7 @@
             </div>
         </div>
         
-        <!-- Quick Actions -->
-        <h2 class="section-title">
-            <i class="fas fa-bolt"></i>
-            Quick Actions
-        </h2>
-        
-        <div class="quick-actions">
-            <a href="{{ route('events') }}" class="action-card">
-                <div class="action-icon">
-                    <i class="fas fa-calendar-alt"></i>
-                </div>
-                <div class="action-title">Browse Events</div>
-                <div class="action-description">Discover upcoming epic events and register for your favorites</div>
-            </a>
-            
-            <a href="{{ route('merchandise') }}" class="action-card">
-                <div class="action-icon">
-                    <i class="fas fa-tshirt"></i>
-                </div>
-                <div class="action-title">Shop Merchandise</div>
-                <div class="action-description">Get exclusive Epic Events merchandise and accessories</div>
-            </a>
-            
-            <a href="{{ route('portfolio') }}" class="action-card">
-                <div class="action-icon">
-                    <i class="fas fa-images"></i>
-                </div>
-                <div class="action-title">View Portfolio</div>
-                <div class="action-description">Check out photos from past events and memories</div>
-            </a>
-            
-            <a href="{{ route('collab') }}" class="action-card">
-                <div class="action-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <div class="action-title">Collaborate</div>
-                <div class="action-description">Partner with us for amazing events and projects</div>
-            </a>
-        </div>
+      
         
         <!-- Recent Activity -->
         <h2 class="section-title">

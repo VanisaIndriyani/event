@@ -45,4 +45,20 @@ class EventFormField extends Model
     {
         return $query->orderBy('sort_order');
     }
+
+    /**
+     * Get field types yang tersedia
+     */
+    public static function getFieldTypes()
+    {
+        return [
+            'text' => 'Text Input',
+            'email' => 'Email Input',
+            'number' => 'Number Input',
+            'textarea' => 'Textarea',
+            'select' => 'Select Dropdown',
+            'file' => 'File Upload',
+            'date' => 'Date Input'
+        ];
+    }
 }

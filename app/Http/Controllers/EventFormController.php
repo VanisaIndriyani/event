@@ -19,12 +19,8 @@ class EventFormController extends Controller
     {
         $fieldTypes = [
             'text' => 'Text',
-            'email' => 'Email',
             'number' => 'Number',
-            'textarea' => 'Textarea',
-            'select' => 'Select',
-            'file' => 'File',
-            'date' => 'Date'
+            'file' => 'File (Image)'
         ];
         return view('admin.events.form-fields.create', compact('event', 'fieldTypes'));
     }
@@ -34,7 +30,7 @@ class EventFormController extends Controller
         $validator = Validator::make($request->all(), [
             'field_name' => 'required|string|max:255|unique:event_form_fields,field_name,NULL,id,event_id,' . $event->id,
             'field_label' => 'required|string|max:255',
-            'field_type' => 'required|in:text,email,number,textarea,select,file,date',
+            'field_type' => 'required|in:text,number,file',
             'field_options' => 'nullable|array',
             'is_required' => 'boolean',
             'sort_order' => 'integer|min:0'
@@ -77,7 +73,7 @@ class EventFormController extends Controller
         $validator = Validator::make($request->all(), [
             'field_name' => 'required|string|max:255|unique:event_form_fields,field_name,' . $formField->id . ',id,event_id,' . $event->id,
             'field_label' => 'required|string|max:255',
-            'field_type' => 'required|in:text,email,number,textarea,select,file,date',
+            'field_type' => 'required|in:text,number,file',
             'field_options' => 'nullable|array',
             'is_required' => 'boolean',
             'sort_order' => 'integer|min:0',

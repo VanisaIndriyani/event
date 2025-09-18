@@ -180,6 +180,10 @@
 
 @push('styles')
 <style>
+    :root {
+        --glass-bg: rgba(59, 130, 246, 0.3);
+    }
+    
     /* Override admin layout for this page */
     .admin-content {
         background: #ffffff;
@@ -218,7 +222,7 @@
     }
     
     .form-section {
-        background: #f8fafc;
+        background: var(--glass-bg);
         padding: 1.5rem;
         border-radius: 12px;
         border: 1px solid #e5e7eb;

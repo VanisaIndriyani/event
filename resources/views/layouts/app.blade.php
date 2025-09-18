@@ -115,6 +115,18 @@
             text-decoration: none;
         }
         
+        .navbar-logo {
+            height: 50px;
+            width: auto;
+            filter: brightness(1.2);
+            transition: all 0.3s ease;
+        }
+        
+        .navbar-brand:hover .navbar-logo {
+            transform: scale(1.1);
+            filter: brightness(1.4);
+        }
+        
         .nav-link {
             color: var(--text-gray);
             text-decoration: none;
@@ -270,8 +282,9 @@
     <!-- Navigation -->
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
-            <a href="{{ route('home') }}" class="navbar-brand">
-                <i class="fas fa-rocket me-2"></i> lark fest
+            <a href="{{ route('home') }}" class="navbar-brand d-flex align-items-center">
+                <img src="{{ asset('img/logo.png') }}" alt="Lark Fest Logo" class="navbar-logo me-2">
+             
             </a>
             
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">

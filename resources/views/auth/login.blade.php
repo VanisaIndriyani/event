@@ -23,6 +23,23 @@
         box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
     }
     
+    .auth-logo-container {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    
+    .auth-logo {
+              height: 150px;
+              width: auto;
+              filter: brightness(1.2) drop-shadow(0 0 20px rgba(59, 130, 246, 0.3));
+              transition: all 0.3s ease;
+          }
+    
+    .auth-logo:hover {
+        transform: scale(1.05);
+        filter: brightness(1.4) drop-shadow(0 0 30px rgba(59, 130, 246, 0.5));
+    }
+    
     .auth-title {
         font-family: 'Orbitron', monospace;
         font-size: 2rem;
@@ -196,6 +213,22 @@
         0%, 100% { transform: translateY(0px) rotate(0deg); }
         50% { transform: translateY(-30px) rotate(180deg); }
     }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .auth-logo {
+            height: 100px;
+        }
+        
+        .auth-title {
+            font-size: 1.5rem;
+        }
+        
+        .auth-card {
+            padding: 2rem;
+            margin: 1rem;
+        }
+    }
 </style>
 @endpush
 
@@ -211,8 +244,8 @@
         <div class="row justify-content-center">
             <div class="col-md-6 col-lg-5">
                 <div class="auth-card">
-                    <div class="text-center mb-4">
-                        <i class="fas fa-rocket" style="font-size: 3rem; color: var(--accent-blue); margin-bottom: 1rem;"></i>
+                    <div class="auth-logo-container">
+                        <img src="{{ asset('img/logo.png') }}" alt="Lark Fest Logo" class="auth-logo">
                     </div>
                     
                     <h1 class="auth-title">Welcome Back</h1>

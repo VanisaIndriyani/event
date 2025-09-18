@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\FormField;
 use App\Models\Event;
+use App\Models\EventFormField;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -16,7 +16,7 @@ class FormFieldController extends Controller
     public function index(Request $request)
     {
         $eventId = $request->get('event_id');
-        $query = FormField::with('event');
+        $query = EventFormField::with('event');
         
         // Filter by event
         if ($eventId) {
@@ -54,7 +54,7 @@ class FormFieldController extends Controller
     public function create(Request $request)
     {
         $events = Event::where('is_active', true)->get();
-        $fieldTypes = FormField::getFieldTypes();
+        $fieldTypes = EventFormField::getFieldTypes();
         $selectedEventId = $request->get('event_id');
         
         return view('admin.form-fields.create', compact('events', 'fieldTypes', 'selectedEventId'));
@@ -69,18 +69,16 @@ class FormFieldController extends Controller
             'event_id' => 'required|exists:events,id',
             'field_name' => 'required|string|max:255',
             'field_label' => 'required|string|max:255',
-            'field_type' => 'required|in:text,number,file',
+            'field_type' => 'required|in:text,email,number,textarea,select,file,date',
             'field_options' => 'nullable|array',
-            'field_placeholder' => 'nullable|string',
-            'field_description' => 'nullable|string',
             'is_required' => 'boolean',
-            'field_order' => 'integer|min:0',
+            'sort_order' => 'integer|min:0',
             'is_active' => 'boolean'
         ]);
         
         // Custom validation untuk field_name unique per event
         $validator->after(function ($validator) use ($request) {
-            $exists = FormField::where('event_id', $request->event_id)
+            $exists = EventFormField::where('event_id', $request->event_id)
                              ->where('field_name', $request->field_name)
                              ->exists();
             if ($exists) {
@@ -94,14 +92,14 @@ class FormFieldController extends Controller
                            ->withInput();
         }
         
-        // Set default field_order jika tidak diisi
+        // Set default sort_order jika tidak diisi
         $data = $request->all();
-        if (!isset($data['field_order']) || $data['field_order'] === null) {
-            $maxOrder = FormField::where('event_id', $request->event_id)->max('field_order');
-            $data['field_order'] = ($maxOrder ?? 0) + 1;
+        if (!isset($data['sort_order']) || $data['sort_order'] === null) {
+            $maxOrder = EventFormField::where('event_id', $request->event_id)->max('sort_order');
+            $data['sort_order'] = ($maxOrder ?? 0) + 1;
         }
         
-        FormField::create($data);
+        EventFormField::create($data);
         
         return redirect()->route('admin.form-fields.index', ['event_id' => $request->event_id])
                         ->with('success', 'Form field berhasil ditambahkan.');
@@ -110,7 +108,7 @@ class FormFieldController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(FormField $formField)
+    public function show(EventFormField $formField)
     {
         $formField->load('event');
         return view('admin.form-fields.show', compact('formField'));
@@ -119,10 +117,10 @@ class FormFieldController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(FormField $formField)
+    public function edit(EventFormField $formField)
     {
         $events = Event::where('is_active', true)->get();
-        $fieldTypes = FormField::getFieldTypes();
+        $fieldTypes = EventFormField::getFieldTypes();
         
         return view('admin.form-fields.edit', compact('formField', 'events', 'fieldTypes'));
     }
@@ -130,24 +128,22 @@ class FormFieldController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, FormField $formField)
+    public function update(Request $request, EventFormField $formField)
     {
         $validator = Validator::make($request->all(), [
             'event_id' => 'required|exists:events,id',
             'field_name' => 'required|string|max:255',
             'field_label' => 'required|string|max:255',
-            'field_type' => 'required|in:text,number,file',
+            'field_type' => 'required|in:text,email,number,textarea,select,file,date',
             'field_options' => 'nullable|array',
-            'field_placeholder' => 'nullable|string',
-            'field_description' => 'nullable|string',
             'is_required' => 'boolean',
-            'field_order' => 'integer|min:0',
+            'sort_order' => 'integer|min:0',
             'is_active' => 'boolean'
         ]);
         
         // Custom validation untuk field_name unique per event (kecuali record saat ini)
         $validator->after(function ($validator) use ($request, $formField) {
-            $exists = FormField::where('event_id', $request->event_id)
+            $exists = EventFormField::where('event_id', $request->event_id)
                              ->where('field_name', $request->field_name)
                              ->where('id', '!=', $formField->id)
                              ->exists();
@@ -171,7 +167,7 @@ class FormFieldController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(FormField $formField)
+    public function destroy(EventFormField $formField)
     {
         $eventId = $formField->event_id;
         $formField->delete();
@@ -192,7 +188,7 @@ class FormFieldController extends Controller
         ]);
         
         foreach ($request->items as $item) {
-            FormField::where('id', $item['id'])->update(['field_order' => $item['order']]);
+            EventFormField::where('id', $item['id'])->update(['sort_order' => $item['order']]);
         }
         
         return response()->json(['success' => true]);

@@ -120,9 +120,12 @@ use Illuminate\Support\Facades\Storage;
             <h2 class="text-white mb-1" style="font-family: 'Orbitron', monospace;">Event Registrations</h2>
             <p class="text-white mb-0">Manage event registrations and participants</p>
         </div>
-        <div>
-            <a href="{{ route('admin.registrations.export') }}" class="btn btn-primary">
-                <i class="fas fa-download me-2"></i>Export Data
+        <div class="d-flex gap-2">
+            <a href="{{ route('admin.registrations.export.excel') }}" class="btn btn-primary">
+                <i class="fas fa-file-excel me-2"></i>Export Excel
+            </a>
+            <a href="{{ route('admin.registrations.export') }}" class="btn btn-outline-primary">
+                <i class="fas fa-file-csv me-2"></i>Export CSV
             </a>
         </div>
     </div>

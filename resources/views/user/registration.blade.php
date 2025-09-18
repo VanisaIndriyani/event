@@ -215,7 +215,7 @@
         <form action="{{ route('event.register', $event->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             
-            <h5 class="form-section-title">
+            <h5 class="form-section-title" style="color: white;">
                 <i class="fas fa-user-edit"></i>
                 Registration Information
             </h5>

@@ -76,15 +76,34 @@
             text-align: center;
         }
         
+        .sidebar-logo-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .sidebar-logo-img {
+               height: 60px;
+               width: auto;
+               filter: brightness(1.2) drop-shadow(0 0 15px rgba(59, 130, 246, 0.3));
+               transition: all 0.3s ease;
+           }
+        
+        .sidebar-logo-img:hover {
+            transform: scale(1.1);
+            filter: brightness(1.4) drop-shadow(0 0 25px rgba(59, 130, 246, 0.5));
+        }
+        
         .sidebar-logo {
             font-family: 'Orbitron', monospace;
-            font-size: 1.5rem;
+            font-size: 1.2rem;
             font-weight: 700;
             background: var(--gradient-accent);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 0.5rem;
         }
         
         .sidebar-subtitle {
@@ -281,6 +300,14 @@
                 font-size: 1.25rem;
                 cursor: pointer;
             }
+            
+            .sidebar-logo-img {
+                height: 80px;
+            }
+            
+            .sidebar-logo {
+                font-size: 1.5rem;
+            }
         }
         
         .mobile-toggle {
@@ -313,7 +340,10 @@
         <!-- Sidebar -->
         <aside class="admin-sidebar" id="adminSidebar">
             <div class="sidebar-header">
-                <div class="sidebar-logo"> LARk FEST</div>
+                <div class="sidebar-logo-container">
+                    <img src="{{ asset('img/logo.png') }}" alt="Lark Fest Logo" class="sidebar-logo-img">
+                    <div class="sidebar-logo"></div>
+                </div>
                 <div class="sidebar-subtitle">Admin Dashboard</div>
             </div>
             
@@ -423,6 +453,9 @@
             </div>
         </main>
     </div>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

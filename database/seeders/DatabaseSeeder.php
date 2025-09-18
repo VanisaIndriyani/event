@@ -24,8 +24,8 @@ class DatabaseSeeder extends Seeder
             MerchandiseSeeder::class,
             CollaborationSeeder::class,
             EventSeeder::class,
-            FormFieldSeeder::class,
-            EventRegistrationSeeder::class,
+            DefaultFormFieldsSeeder::class,
+            PaymentMethodSeeder::class,
             UserSeeder::class,
             AdminSeeder::class,
         ]);

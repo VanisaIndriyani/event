@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\EventFormField;
 
 class Event extends Model
 {
@@ -34,7 +35,7 @@ class Event extends Model
 
     public function formFields()
     {
-        return $this->hasMany(FormField::class);
+        return $this->hasMany(EventFormField::class);
     }
 
     public function activeFormFields()

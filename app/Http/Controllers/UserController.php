@@ -204,7 +204,7 @@ class UserController extends Controller
         
         // Add payment validation if event has price
         if ($event->price > 0) {
-            $rules['payment_method'] = 'required|string|in:bank_transfer,e_wallet,qris,cash';
+            $rules['payment_method'] = 'required|string';
             $rules['payment_proof'] = 'required|file|mimes:jpg,jpeg,png,pdf|max:2048';
         }
         
@@ -253,10 +253,32 @@ class UserController extends Controller
             $filename = 'payment_' . time() . '_' . $file->getClientOriginalName();
             $path = $file->storeAs('payment_proofs', $filename, 'public');
             
+            // Map section-based payment method to enum values
+            $paymentMethodInput = $request->input('payment_method');
+            $paymentSections = Settings::get('payment_sections', []);
+            $paymentMethod = 'bank_transfer'; // default
+            
+            if (preg_match('/section_(\d+)/', $paymentMethodInput, $matches)) {
+                $sectionIndex = (int)$matches[1];
+                if (isset($paymentSections[$sectionIndex])) {
+                    $sectionName = strtolower($paymentSections[$sectionIndex]['name']);
+                    
+                    if (stripos($sectionName, 'bank') !== false || stripos($sectionName, 'transfer') !== false) {
+                        $paymentMethod = 'bank_transfer';
+                    } elseif (stripos($sectionName, 'wallet') !== false || stripos($sectionName, 'ovo') !== false || stripos($sectionName, 'gopay') !== false || stripos($sectionName, 'dana') !== false) {
+                        $paymentMethod = 'e_wallet';
+                    } elseif (stripos($sectionName, 'qris') !== false) {
+                        $paymentMethod = 'qris';
+                    } elseif (stripos($sectionName, 'cash') !== false) {
+                        $paymentMethod = 'cash';
+                    }
+                }
+            }
+            
             EventPayment::create([
                 'event_registration_id' => $registration->id,
                 'amount' => $event->price,
-                'payment_method' => $request->input('payment_method'),
+                'payment_method' => $paymentMethod,
                 'payment_proof' => $path,
                 'payment_status' => 'pending',
                 'paid_at' => now()

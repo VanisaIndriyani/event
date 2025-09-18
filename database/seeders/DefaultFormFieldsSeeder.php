@@ -39,7 +39,7 @@ class DefaultFormFieldsSeeder extends Seeder
             [
                 'field_name' => 'email',
                 'field_label' => 'Email',
-                'field_type' => 'email',
+                'field_type' => 'text',
                 'is_required' => true,
                 'sort_order' => 2,
                 'is_active' => true
@@ -53,17 +53,17 @@ class DefaultFormFieldsSeeder extends Seeder
                 'is_active' => true
             ],
             [
-                'field_name' => 'instansi',
-                'field_label' => 'Asal Instansi/Organisasi',
-                'field_type' => 'text',
+                'field_name' => 'usia',
+                'field_label' => 'Usia',
+                'field_type' => 'number',
                 'is_required' => false,
                 'sort_order' => 4,
                 'is_active' => true
             ],
             [
-                'field_name' => 'motivasi',
-                'field_label' => 'Motivasi Mengikuti Event',
-                'field_type' => 'textarea',
+                'field_name' => 'foto_profil',
+                'field_label' => 'Foto Profil',
+                'field_type' => 'file',
                 'is_required' => false,
                 'sort_order' => 5,
                 'is_active' => true
