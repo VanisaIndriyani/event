@@ -124,9 +124,7 @@ use Illuminate\Support\Facades\Storage;
             <a href="{{ route('admin.registrations.export.excel') }}" class="btn btn-primary">
                 <i class="fas fa-file-excel me-2"></i>Export Excel
             </a>
-            <a href="{{ route('admin.registrations.export') }}" class="btn btn-outline-primary">
-                <i class="fas fa-file-csv me-2"></i>Export CSV
-            </a>
+           
         </div>
     </div>
 
@@ -308,20 +306,10 @@ use Illuminate\Support\Facades\Storage;
                             <i class="fas fa-eye"></i>
                         </button>
                         @if($registration->user->email)
-                                        <button class="btn btn-action btn-email" title="Send Email Notification" onclick="sendEmailNotification('{{ $registration->user->email }}', '{{ $registration->user->name }}', '{{ $registration->event->name }}', '{{ $registration->status }}', {{ $registration->id }})" style="background: linear-gradient(135deg, #007bff, #0056b3); color: white; border: none; margin: 0 2px;">
+                                        <button class="btn btn-action btn-email" title="Send Email Notification" onclick="sendEmailNotification({{ json_encode($registration->user->email) }}, {{ json_encode($registration->user->name) }}, {{ json_encode($registration->event->title) }}, {{ json_encode($registration->status) }}, {{ $registration->id }})" style="background: linear-gradient(135deg, #007bff, #0056b3); color: white; border: none; margin: 0 2px;">
                                             <i class="fas fa-envelope"></i>
                                         </button>
-                                        @endif
-                        <div class="dropdown d-inline">
-                            <button class="btn btn-action btn-edit dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus({{ $registration->id }}, 'confirmed')">Confirm</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus({{ $registration->id }}, 'pending')">Set Pending</a></li>
-                                <li><a class="dropdown-item" href="#" onclick="updateStatus({{ $registration->id }}, 'cancelled')">Cancel</a></li>
-                            </ul>
-                        </div>
+                      
                         <button class="btn btn-action btn-delete" title="Delete" onclick="deleteRegistration({{ $registration->id }})">
                             <i class="fas fa-trash"></i>
                         </button>

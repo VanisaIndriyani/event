@@ -1105,7 +1105,7 @@ use Illuminate\Support\Facades\Storage;
                                 <img src="{{ Storage::url($registration->payment->payment_proof) }}" 
                                      alt="Payment Proof" 
                                      class="proof-image"
-                                     onclick="openImageModal('{{ Storage::url($registration->payment->payment_proof) }}')"
+                                     onclick="openImageModal({{ json_encode(Storage::url($registration->payment->payment_proof)) }})"
                                      onerror="this.style.display='none'; this.nextElementSibling.style.display='block'">
                                 <div class="proof-image-error" style="display: none;">
                                     <i class="fas fa-exclamation-triangle"></i>

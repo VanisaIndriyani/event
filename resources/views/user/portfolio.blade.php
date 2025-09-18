@@ -380,7 +380,7 @@
         <div class="portfolio-grid" id="portfolioGrid">
             @if($pastEvents->count() > 0)
                 @foreach($pastEvents as $index => $event)
-                <div class="portfolio-item" data-category="{{ strtolower($event->category) }}" onclick="openLightbox({{ $index }})">
+                <div class="portfolio-item" data-category="{{ strtolower($event->category) }}" onclick="openLightbox({{ json_encode($index) }})">
                     <div class="portfolio-image">
                         @if($event->image)
                             <img src="{{ asset('storage/' . $event->image) }}" alt="{{ $event->title }}">

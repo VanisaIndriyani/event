@@ -234,7 +234,8 @@ class UserController extends Controller
             if ($field->field_type === 'file' && $request->hasFile($fieldName)) {
                 $file = $request->file($fieldName);
                 $filename = time() . '_' . $file->getClientOriginalName();
-                $path = $file->storeAs('event_files', $filename, 'public');
+                // Use public_uploads disk for hosting compatibility (no symlink needed)
+                $path = $file->storeAs('event_files', $filename, 'public_uploads');
                 $value = $path;
             }
             
@@ -251,7 +252,8 @@ class UserController extends Controller
         if ($event->price > 0 && $request->hasFile('payment_proof')) {
             $file = $request->file('payment_proof');
             $filename = 'payment_' . time() . '_' . $file->getClientOriginalName();
-            $path = $file->storeAs('payment_proofs', $filename, 'public');
+            // Use public_uploads disk for hosting compatibility (no symlink needed)
+            $path = $file->storeAs('payment_proofs', $filename, 'public_uploads');
             
             // Map section-based payment method to enum values
             $paymentMethodInput = $request->input('payment_method');

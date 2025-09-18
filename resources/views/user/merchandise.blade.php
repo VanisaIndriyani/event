@@ -456,7 +456,7 @@
                         </div>
                         <div class="merchandise-actions">
                             @if($item->stock > 0)
-                                <a href="#" class="btn-whatsapp" onclick="orderViaWhatsApp('{{ $item->name }}', 'Rp {{ number_format($item->price, 0, ',', '.') }}', 'Standard')">
+                                <a href="#" class="btn-whatsapp" onclick="orderViaWhatsApp({{ json_encode($item->name) }}, {{ json_encode('Rp ' . number_format($item->price, 0, ',', '.')) }}, 'Standard')">
                                     <i class="fab fa-whatsapp"></i>Order Now
                                 </a>
                             @else
