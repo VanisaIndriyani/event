@@ -95,5 +95,10 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/analytics', [AdminController::class, 'analytics'])->name('analytics');
     
     // Email Notification Management
-Route::post('/email/send-notification', [AdminController::class, 'sendEmailNotification'])->name('email.send-notification');
+    Route::post('/email/send-notification', [AdminController::class, 'sendEmailNotification'])->name('email.send-notification');
+    
+    // Session keep-alive endpoint
+    Route::get('/ping', function() {
+        return response()->json(['status' => 'ok', 'time' => now()]);
+    })->name('session.ping');
 });

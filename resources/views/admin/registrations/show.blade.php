@@ -1516,6 +1516,33 @@ use Illuminate\Support\Facades\Storage;
         if (!csrfTokenElement && authAlert) {
             authAlert.classList.remove('d-none');
         }
+        
+        // Session keep-alive mechanism untuk mencegah logout otomatis
+        setInterval(function() {
+            fetch('/admin/ping', {
+                method: 'GET',
+                credentials: 'same-origin',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+                }
+            }).then(function(response) {
+                if (response.status === 401) {
+                    // Session expired, redirect to login
+                    console.log('Session expired, redirecting to login');
+                    const currentHost = window.location.hostname;
+                    if (currentHost.includes('lark.today')) {
+                        window.location.href = 'https://lark.today/event/public/login';
+                    } else {
+                        window.location.href = '/login';
+                    }
+                } else if (response.ok) {
+                    console.log('Session keep-alive successful');
+                }
+            }).catch(function(error) {
+                console.log('Session keep-alive failed:', error);
+            });
+        }, 300000); // Ping setiap 5 menit (300000ms)
     });
     
     function closeImageModal() {
