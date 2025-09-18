@@ -1201,8 +1201,15 @@ use Illuminate\Support\Facades\Storage;
             // Check if user is authenticated first
             const csrfTokenElement = document.querySelector('meta[name="csrf-token"]');
             if (!csrfTokenElement) {
-                alert('Authentication required. Please login first.');
-                window.location.href = '/login';
+                const currentHost = window.location.host;
+                let loginUrl = '/login';
+                
+                if (currentHost.includes('lark.today')) {
+                    loginUrl = 'https://lark.today/event/public/login';
+                }
+                
+                alert(`Authentication required. You need to login first to update payment status.\n\nYou will be redirected to the login page.`);
+                window.location.href = loginUrl;
                 return;
             }
             
@@ -1214,10 +1221,14 @@ use Illuminate\Support\Facades\Storage;
             const url = `/admin/payments/${paymentId}/status`;
             const csrfToken = csrfTokenElement.getAttribute('content');
             
+            console.log('=== DEBUG INFO ===');
             console.log('Making request to:', url);
             console.log('Method: PUT');
             console.log('CSRF Token:', csrfToken);
             console.log('Payload:', { status: status });
+            console.log('Current URL:', window.location.href);
+            console.log('User Agent:', navigator.userAgent);
+            console.log('==================');
             
             fetch(url, {
                 method: 'PUT',
@@ -1251,11 +1262,18 @@ use Illuminate\Support\Facades\Storage;
                         
                         // Handle authentication errors
                         if (response.status === 401) {
-                            alert('Session expired. Redirecting to login...');
+                            const currentHost = window.location.host;
+                            let loginUrl = '/login';
+                            
+                            if (currentHost.includes('lark.today')) {
+                                loginUrl = 'https://lark.today/event/public/login';
+                            }
+                            
+                            alert('Session expired or not authenticated. You need to login first.\n\nRedirecting to login page...');
                             if (errorData.redirect) {
                                 window.location.href = errorData.redirect;
                             } else {
-                                window.location.href = '/login';
+                                window.location.href = loginUrl;
                             }
                             return;
                         } else if (response.status === 403) {
@@ -1263,6 +1281,19 @@ use Illuminate\Support\Facades\Storage;
                             if (errorData.redirect) {
                                 window.location.href = errorData.redirect;
                             }
+                            return;
+                        } else if (response.status === 405) {
+                            alert('Method Not Allowed Error (405).\n\nThis usually means:\n1. You are not logged in as admin\n2. The route configuration has issues\n\nPlease login first and try again.');
+                            const currentHost = window.location.host;
+                            let loginUrl = '/login';
+                            
+                            if (currentHost.includes('lark.today')) {
+                                loginUrl = 'https://lark.today/event/public/login';
+                            }
+                            
+                            setTimeout(() => {
+                                window.location.href = loginUrl;
+                            }, 3000);
                             return;
                         }
                         
