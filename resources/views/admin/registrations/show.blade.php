@@ -1218,14 +1218,19 @@ use Illuminate\Support\Facades\Storage;
             console.log('Sending request to:', `/admin/payments/${paymentId}/status`);
             console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
             
+            // Create form data with method spoofing for better hosting compatibility
+            const formData = new FormData();
+            formData.append('_method', 'PUT');
+            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            formData.append('status', status);
+            
             fetch(`/admin/payments/${paymentId}/status`, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
                     'Accept': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    'X-Requested-With': 'XMLHttpRequest'
                 },
-                body: JSON.stringify({ status: status })
+                body: formData
             })
             .then(response => {
                 console.log('Response status:', response.status);

@@ -1,0 +1,119 @@
+<IfModule mod_rewrite.c>
+    <IfModule mod_negotiation.c>
+        Options -MultiViews -Indexes
+    </IfModule>
+
+    RewriteEngine On
+
+    # Handle Authorization Header
+    RewriteCond %{HTTP:Authorization} .
+    RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+    # Handle X-XSRF-Token Header
+    RewriteCond %{HTTP:x-xsrf-token} .
+    RewriteRule .* - [E=HTTP_X_XSRF_TOKEN:%{HTTP:X-XSRF-Token}]
+
+    # Force HTTPS (uncomment if needed)
+    # RewriteCond %{HTTPS} off
+    # RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Redirect Trailing Slashes If Not A Folder...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_URI} (.+)/$
+    RewriteRule ^ %1 [L,R=301]
+
+    # Send Requests To Front Controller...
+    RewriteCond %{REQUEST_FILENAME} !-d
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteRule ^ index.php [L]
+</IfModule>
+
+# PHP Configuration for hosting
+<IfModule mod_php.c>
+    # Increase upload limits
+    php_value upload_max_filesize 64M
+    php_value post_max_size 64M
+    php_value max_execution_time 300
+    php_value max_input_time 300
+    php_value memory_limit 256M
+    
+    # Session configuration
+    php_value session.gc_maxlifetime 7200
+    php_value session.cookie_lifetime 7200
+    
+    # Error reporting (disable in production)
+    php_value display_errors Off
+    php_value log_errors On
+    
+    # OPcache settings (if available)
+    php_value opcache.enable 1
+    php_value opcache.memory_consumption 128
+    php_value opcache.interned_strings_buffer 8
+    php_value opcache.max_accelerated_files 4000
+    php_value opcache.revalidate_freq 2
+    php_value opcache.fast_shutdown 1
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+    # Prevent clickjacking
+    Header always append X-Frame-Options SAMEORIGIN
+    
+    # XSS Protection
+    Header set X-XSS-Protection "1; mode=block"
+    
+    # Content Type Options
+    Header set X-Content-Type-Options nosniff
+    
+    # Referrer Policy
+    Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# Protect sensitive files
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "composer.json">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "composer.lock">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "package.json">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# Cache static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/svg+xml "access plus 1 month"
+    ExpiresByType application/pdf "access plus 1 month"
+    ExpiresByType font/woff "access plus 1 month"
+    ExpiresByType font/woff2 "access plus 1 month"
+</IfModule>
+
+# Compress files
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+</IfModule>
