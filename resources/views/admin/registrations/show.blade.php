@@ -1256,6 +1256,11 @@ use Illuminate\Support\Facades\Storage;
             formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
             formData.append('status', status);
             
+            // Debug: Log formData contents
+            console.log('fetch URL:', `/admin/payments/${paymentId}/status`);
+            console.log('formData contents:', Array.from(formData.entries()));
+            console.log('Request method: POST with _method spoofing to PUT');
+            
             // Try fetch first, fallback to form submission if needed
             fetch(`/admin/payments/${paymentId}/status`, {
                 method: 'POST',
