@@ -86,6 +86,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     
     // Payment management
     Route::put('/payments/{payment}/status', [PaymentController::class, 'updateStatus'])->name('payments.status');
+    Route::post('/payments/{payment}/send-email', [PaymentController::class, 'sendEmail'])->name('payments.send-email');
     
     // Settings
     Route::get('/settings', [AdminController::class, 'settings'])->name('settings');

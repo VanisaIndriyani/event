@@ -16,13 +16,18 @@ class EventPayment extends Model
         'admin_notes',
         'paid_at',
         'verified_at',
-        'verified_by'
+        'verified_by',
+        'email_sent',
+        'email_sent_at',
+        'email_sent_by'
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'paid_at' => 'datetime',
-        'verified_at' => 'datetime'
+        'verified_at' => 'datetime',
+        'email_sent' => 'boolean',
+        'email_sent_at' => 'datetime'
     ];
 
     public function eventRegistration(): BelongsTo
@@ -33,6 +38,11 @@ class EventPayment extends Model
     public function verifiedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');
+    }
+
+    public function emailSentBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'email_sent_by');
     }
 
     public function scopePending($query)
@@ -48,5 +58,20 @@ class EventPayment extends Model
     public function scopeRejected($query)
     {
         return $query->where('payment_status', 'rejected');
+    }
+
+    public function scopeLunas($query)
+    {
+        return $query->where('payment_status', 'lunas');
+    }
+
+    public function scopeEmailSent($query)
+    {
+        return $query->where('email_sent', true);
+    }
+
+    public function scopeEmailNotSent($query)
+    {
+        return $query->where('email_sent', false);
     }
 }

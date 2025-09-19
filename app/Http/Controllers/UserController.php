@@ -282,7 +282,7 @@ class UserController extends Controller
                 'amount' => $event->price,
                 'payment_method' => $paymentMethod,
                 'payment_proof' => $path,
-                'payment_status' => 'pending',
+                'payment_status' => 'lunas', // Auto set to 'lunas' when payment proof uploaded
                 'paid_at' => now()
             ]);
         }

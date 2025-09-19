@@ -1116,16 +1116,29 @@ use Illuminate\Support\Facades\Storage;
                                         <i class="fas fa-circle me-1"></i>
                                         {{ ucfirst($registration->payment->payment_status) }}
                                     </span>
-                                    @if($registration->payment->payment_status === 'pending')
+                                    
                                     <div class="payment-actions ms-3">
-                                        <button class="btn btn-sm btn-success me-2" title="Verify Payment" onclick="updatePaymentStatus({{ $registration->payment->id }}, 'verified')" style="padding: 4px 8px; font-size: 12px;">
-                                            <i class="fas fa-check me-1"></i>Verify
-                                        </button>
-                                        <button class="btn btn-sm btn-danger" title="Reject Payment" onclick="updatePaymentStatus({{ $registration->payment->id }}, 'rejected')" style="padding: 4px 8px; font-size: 12px;">
-                                            <i class="fas fa-times me-1"></i>Reject
-                                        </button>
+                                        @if($registration->payment->payment_status === 'pending')
+                                            <button class="btn btn-sm btn-success me-2" title="Verify Payment" onclick="updatePaymentStatus({{ $registration->payment->id }}, 'verified')" style="padding: 4px 8px; font-size: 12px;">
+                                                <i class="fas fa-check me-1"></i>Verify
+                                            </button>
+                                            <button class="btn btn-sm btn-danger me-2" title="Reject Payment" onclick="updatePaymentStatus({{ $registration->payment->id }}, 'rejected')" style="padding: 4px 8px; font-size: 12px;">
+                                                <i class="fas fa-times me-1"></i>Reject
+                                            </button>
+                                        @endif
+                                        
+                                        @if(in_array($registration->payment->payment_status, ['verified', 'lunas']))
+                                            @if($registration->payment->email_sent)
+                                                <button class="btn btn-sm btn-secondary" disabled title="Email Already Sent" style="padding: 4px 8px; font-size: 12px;">
+                                                    <i class="fas fa-envelope-open me-1"></i>Email Sent
+                                                </button>
+                                            @else
+                                                <button class="btn btn-sm btn-primary" title="Send Email Approval" onclick="sendEmailApproval({{ $registration->payment->id }})" style="padding: 4px 8px; font-size: 12px;">
+                                                    <i class="fas fa-envelope me-1"></i>Send Email
+                                                </button>
+                                            @endif
+                                        @endif
                                     </div>
-                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -1358,6 +1371,29 @@ use Illuminate\Support\Facades\Storage;
         form.submit();
         
         return Promise.resolve('FORM_SUBMITTED');
+    }
+
+    // Send email approval function
+    function sendEmailApproval(paymentId) {
+        if (!confirm('Apakah Anda yakin ingin mengirim email approval ke user?')) {
+            return;
+        }
+        
+        // Create form for email sending
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/payments/${paymentId}/send-email`;
+        form.style.display = 'none';
+        
+        // Add CSRF token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_token';
+        csrfInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        form.appendChild(csrfInput);
+        
+        document.body.appendChild(form);
+        form.submit();
     }
 
     // Show alert function
