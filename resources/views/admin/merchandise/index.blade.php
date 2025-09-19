@@ -119,6 +119,115 @@
         box-shadow: 0 8px 25px rgba(40, 167, 69, 0.4);
         color: #fff;
     }
+    
+    /* Responsive Table Wrapper */
+     .table-responsive-wrapper {
+         overflow-x: auto;
+         -webkit-overflow-scrolling: touch;
+         border-radius: 15px;
+         box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+         position: relative;
+     }
+     
+     /* Scroll Indicator */
+     .scroll-indicator {
+         position: absolute;
+         right: 0;
+         top: 50%;
+         transform: translateY(-50%);
+         background: linear-gradient(90deg, transparent, rgba(0, 123, 255, 0.8));
+         color: white;
+         padding: 10px 15px;
+         border-radius: 20px 0 0 20px;
+         font-size: 0.8rem;
+         z-index: 10;
+         pointer-events: none;
+         opacity: 0;
+         transition: opacity 0.3s ease;
+     }
+     
+     .table-responsive-wrapper:hover .scroll-indicator {
+         opacity: 1;
+     }
+     
+     @media (max-width: 768px) {
+         .scroll-indicator {
+             opacity: 1;
+             animation: pulse 2s infinite;
+         }
+     }
+     
+     @keyframes pulse {
+         0%, 100% { opacity: 0.7; }
+         50% { opacity: 1; }
+     }
+    
+    .table-responsive-wrapper::-webkit-scrollbar {
+        height: 8px;
+    }
+    
+    .table-responsive-wrapper::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 4px;
+    }
+    
+    .table-responsive-wrapper::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        border-radius: 4px;
+    }
+    
+    .table-responsive-wrapper::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #0056b3, #004085);
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .table-futuristic th,
+        .table-futuristic td {
+            padding: 8px 10px;
+            font-size: 0.85rem;
+        }
+        
+        .merchandise-thumb,
+        .no-image {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .btn-action {
+            padding: 6px 8px;
+            font-size: 0.75rem;
+            margin: 0 1px;
+        }
+        
+        .status-badge {
+            padding: 3px 8px;
+            font-size: 0.7rem;
+        }
+        
+        .table-futuristic th {
+            white-space: nowrap;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .table-futuristic th,
+        .table-futuristic td {
+            padding: 6px 8px;
+            font-size: 0.8rem;
+        }
+        
+        .merchandise-thumb,
+        .no-image {
+            width: 35px;
+            height: 35px;
+        }
+        
+        .btn-action {
+            padding: 4px 6px;
+            font-size: 0.7rem;
+        }
+    }
 </style>
 @endpush
 
@@ -153,8 +262,12 @@
     </div>
 
     <!-- Merchandise List -->
-    <div class="table-futuristic">
-        <table class="table table-hover mb-0">
+    <div class="table-responsive-wrapper">
+        <div class="scroll-indicator d-md-none">
+            <i class="fas fa-arrow-right me-1"></i>Geser →
+        </div>
+        <div class="table-futuristic">
+            <table class="table table-hover mb-0">
             <thead>
                 <tr>
                     <th>Image</th>
@@ -221,7 +334,8 @@
                     </tr>
                 @endif
             </tbody>
-        </table>
+            </table>
+        </div>
     </div>
     
     @if(isset($merchandise) && method_exists($merchandise, 'links'))
@@ -234,4 +348,67 @@
         </div>
     @endif
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tableWrapper = document.querySelector('.table-responsive-wrapper');
+    const scrollIndicator = document.querySelector('.scroll-indicator');
+    
+    if (tableWrapper && scrollIndicator) {
+        // Hide scroll indicator when scrolled to the end
+        tableWrapper.addEventListener('scroll', function() {
+            const scrollLeft = this.scrollLeft;
+            const scrollWidth = this.scrollWidth;
+            const clientWidth = this.clientWidth;
+            
+            // Hide indicator when scrolled near the end (within 50px)
+            if (scrollLeft + clientWidth >= scrollWidth - 50) {
+                scrollIndicator.style.opacity = '0';
+            } else {
+                scrollIndicator.style.opacity = '1';
+            }
+        });
+        
+        // Auto-hide indicator after 5 seconds on mobile
+        if (window.innerWidth <= 768) {
+            setTimeout(() => {
+                scrollIndicator.style.opacity = '0.3';
+            }, 5000);
+        }
+        
+        // Show indicator on hover/touch
+        tableWrapper.addEventListener('mouseenter', function() {
+            if (window.innerWidth > 768) {
+                scrollIndicator.style.opacity = '1';
+            }
+        });
+        
+        tableWrapper.addEventListener('mouseleave', function() {
+            if (window.innerWidth > 768) {
+                scrollIndicator.style.opacity = '0';
+            }
+        });
+    }
+    
+    // Add smooth scroll behavior for better UX
+    if (tableWrapper) {
+        tableWrapper.style.scrollBehavior = 'smooth';
+    }
+    
+    // Add touch feedback for mobile
+    const actionButtons = document.querySelectorAll('.btn-action');
+    actionButtons.forEach(button => {
+        button.addEventListener('touchstart', function() {
+            this.style.transform = 'scale(0.95)';
+        });
+        
+        button.addEventListener('touchend', function() {
+            this.style.transform = 'scale(1)';
+        });
+    });
+});
+</script>
+@endpush
+
 @endsection
