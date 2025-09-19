@@ -45,9 +45,15 @@ class PaymentController extends Controller
             $payment->eventRegistration->update(['status' => 'pending']);
         }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Payment status updated successfully.'
-        ]);
+        // Handle both AJAX and form submission
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Payment status updated successfully.'
+            ]);
+        } else {
+            // For form submission, redirect back with success message
+            return redirect()->back()->with('success', 'Status pembayaran berhasil diperbarui!');
+        }
     }
 }

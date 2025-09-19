@@ -750,6 +750,31 @@ use Illuminate\Support\Facades\Storage;
         </div>
     </div>
     
+    <!-- Flash Messages -->
+    @if(session('success'))
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    @endif
+    
+    @if(session('error'))
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                {{ session('error') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    </div>
+    @endif
+    
     <!-- Authentication Status Alert -->
     <div class="row mb-3">
         <div class="col-12">
@@ -1212,11 +1237,18 @@ use Illuminate\Support\Facades\Storage;
         }
     }
     
-    // Update payment status function
+    // Update payment status function with enhanced error handling
     function updatePaymentStatus(paymentId, status) {
         if (confirm(`Apakah Anda yakin ingin mengubah status pembayaran menjadi ${status}?`)) {
             console.log('Sending request to:', `/admin/payments/${paymentId}/status`);
             console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            
+            // Show loading state
+            const buttons = document.querySelectorAll(`[onclick*="updatePaymentStatus(${paymentId}"]`);
+            buttons.forEach(btn => {
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+            });
             
             // Create form data with method spoofing for better hosting compatibility
             const formData = new FormData();
@@ -1224,20 +1256,39 @@ use Illuminate\Support\Facades\Storage;
             formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
             formData.append('status', status);
             
+            // Try fetch first, fallback to form submission if needed
             fetch(`/admin/payments/${paymentId}/status`, {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Cache-Control': 'no-cache'
                 },
                 body: formData
             })
             .then(response => {
                 console.log('Response status:', response.status);
                 console.log('Response headers:', response.headers);
+                
+                // If 405 Method Not Allowed, try fallback form submission
+                if (response.status === 405) {
+                    console.log('405 error detected, trying fallback form submission');
+                    return submitViaForm(paymentId, status);
+                }
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
+                }
+                
                 return response.json();
             })
             .then(data => {
+                // Handle both direct response and fallback response
+                if (data === 'FORM_SUBMITTED') {
+                    showAlert('Status pembayaran berhasil diperbarui!', 'success');
+                    setTimeout(() => location.reload(), 1500);
+                    return;
+                }
                 console.log('Response data:', data);
                 if (data.success) {
                     showAlert('success', data.message || 'Status pembayaran berhasil diupdate!');
@@ -1250,9 +1301,58 @@ use Illuminate\Support\Facades\Storage;
             })
             .catch(error => {
                 console.error('Error:', error);
-                showAlert('error', 'Terjadi kesalahan saat mengupdate status pembayaran!');
+                
+                // Reset button state
+                buttons.forEach(btn => {
+                    btn.disabled = false;
+                    btn.innerHTML = btn.classList.contains('btn-success') ? 
+                        '<i class="fas fa-check"></i> Verify' : 
+                        '<i class="fas fa-times"></i> Reject';
+                });
+                
+                // If fetch fails completely, try form fallback
+                if (error.message.includes('405') || error.message.includes('Method Not Allowed')) {
+                    console.log('Trying form fallback due to method error');
+                    submitViaForm(paymentId, status);
+                } else {
+                    showAlert('error', 'Terjadi kesalahan saat mengupdate status pembayaran!');
+                }
             });
         }
+    }
+    
+    // Fallback form submission for hosting compatibility
+    function submitViaForm(paymentId, status) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/admin/payments/${paymentId}/status`;
+        form.style.display = 'none';
+        
+        // Add CSRF token
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = '_token';
+        csrfInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        form.appendChild(csrfInput);
+        
+        // Add method spoofing
+        const methodInput = document.createElement('input');
+        methodInput.type = 'hidden';
+        methodInput.name = '_method';
+        methodInput.value = 'PUT';
+        form.appendChild(methodInput);
+        
+        // Add status
+        const statusInput = document.createElement('input');
+        statusInput.type = 'hidden';
+        statusInput.name = 'status';
+        statusInput.value = status;
+        form.appendChild(statusInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+        
+        return Promise.resolve('FORM_SUBMITTED');
     }
 
     // Show alert function
