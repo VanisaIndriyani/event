@@ -382,7 +382,7 @@ class AdminController extends Controller
 
     public function showRegistration($id)
     {
-        $registration = EventRegistration::with(['user', 'event'])->findOrFail($id);
+        $registration = EventRegistration::with(['user', 'event', 'registrationData.eventFormField', 'payment'])->findOrFail($id);
         return view('admin.registrations.show', compact('registration'));
     }
 

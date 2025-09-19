@@ -16,7 +16,7 @@ class PaymentController extends Controller
     public function updateStatus(Request $request, EventPayment $payment)
     {
         $validator = Validator::make($request->all(), [
-            'status' => 'required|in:pending,lunas,verified,rejected',
+            'status' => 'required|in:pending,lunas,rejected',
         ]);
 
         if ($validator->fails()) {
@@ -28,12 +28,10 @@ class PaymentController extends Controller
 
         $payment->update([
             'payment_status' => $request->status,
-            'verified_at' => $request->status === 'verified' ? now() : null,
-            'verified_by' => $request->status === 'verified' ? auth()->id() : null,
         ]);
 
         // Update registration status based on payment status
-        if ($request->status === 'verified') {
+        if ($request->status === 'lunas') {
             $payment->eventRegistration->update(['status' => 'confirmed']);
         } elseif ($request->status === 'rejected') {
             $payment->eventRegistration->update(['status' => 'pending']);
@@ -56,11 +54,11 @@ class PaymentController extends Controller
      */
     public function sendEmail(Request $request, EventPayment $payment)
     {
-        // Check if payment is verified or lunas
-        if (!in_array($payment->payment_status, ['verified', 'lunas'])) {
+        // Check if payment is lunas
+        if ($payment->payment_status !== 'lunas') {
             return response()->json([
                 'success' => false,
-                'message' => 'Email can only be sent for verified or paid payments.'
+                'message' => 'Email can only be sent for paid payments.'
             ], 400);
         }
 

@@ -59,7 +59,7 @@ use Illuminate\Support\Facades\Storage;
         align-items: center;
     }
     
-    .payment-verified { background: #1e40af; color: white; }
+    .payment-lunas { background: #1e40af; color: white; }
     .payment-pending { background: #f59e0b; color: white; }
     .payment-rejected { background: #ef4444; color: white; }
     .payment-none { background: #6b7280; color: white; }
@@ -341,20 +341,22 @@ use Illuminate\Support\Facades\Storage;
      
      .form-data-item-horizontal {
          display: flex;
-         align-items: center;
+         align-items: flex-start;
          gap: 0.75rem;
-         padding: 0.75rem 1rem;
+         padding: 1rem;
          background: rgba(255, 255, 255, 0.05);
-         border-radius: 8px;
+         border-radius: 12px;
          border: 1px solid rgba(255, 255, 255, 0.1);
          transition: all 0.3s ease;
          min-width: 0;
          overflow: hidden;
+         margin-bottom: 1rem;
      }
      
      .form-data-item-horizontal:hover {
          background: rgba(255, 255, 255, 0.08);
-         transform: translateY(-1px);
+         transform: translateY(-2px);
+         box-shadow: 0 4px 15px rgba(30, 64, 175, 0.2);
      }
      
      .form-data-item-horizontal .form-data-icon {
@@ -374,28 +376,34 @@ use Illuminate\Support\Facades\Storage;
          flex: 1;
          display: flex;
          flex-direction: column;
-         gap: 0.25rem;
+         gap: 0.75rem;
          min-width: 0;
          overflow: hidden;
      }
      
      .form-data-label-inline {
-         font-size: 0.8rem;
-         color: #adb5bd;
-         font-weight: 500;
-         text-transform: uppercase;
-         letter-spacing: 0.3px;
+         font-size: 0.85rem;
+         color: #ffd700;
+         font-weight: 600;
+         margin-bottom: 0.5rem;
+         display: flex;
+         align-items: center;
      }
      
      .form-data-value-inline {
-         color: white;
+         color: #e8f4fd;
          font-weight: 500;
          font-size: 0.9rem;
          flex: 1;
          min-width: 0;
-         overflow: hidden;
-         text-overflow: ellipsis;
-         white-space: nowrap;
+         display: flex;
+         align-items: center;
+         background: rgba(255, 255, 255, 0.1);
+         padding: 0.75rem;
+         border-radius: 8px;
+         border-left: 4px solid #17a2b8;
+         line-height: 1.4;
+         word-wrap: break-word;
      }
      
      .form-data-value {
@@ -492,7 +500,7 @@ use Illuminate\Support\Facades\Storage;
           letter-spacing: 0.5px;
       }
       
-      .payment-verified {
+      .payment-lunas {
           background: rgba(76, 175, 80, 0.2);
           color: #4caf50;
           border: 1px solid rgba(76, 175, 80, 0.3);
@@ -1022,24 +1030,38 @@ use Illuminate\Support\Facades\Storage;
                     <div class="form-data-item-horizontal">
                         <div class="form-data-icon">
                             @if($data->field_type === 'file')
-                                <i class="fas fa-file-alt"></i>
+                                @if($data->eventFormField->field_name === 'foto_profil')
+                                    <i class="fas fa-camera"></i>
+                                @else
+                                    <i class="fas fa-file-alt"></i>
+                                @endif
                             @elseif($data->field_type === 'email')
                                 <i class="fas fa-envelope"></i>
-                            @elseif($data->field_type === 'tel')
-                                <i class="fas fa-phone"></i>
+                            @elseif($data->field_type === 'tel' || $data->eventFormField->field_name === 'no_whatsapp')
+                                <i class="fab fa-whatsapp"></i>
+                            @elseif($data->field_type === 'number' || $data->eventFormField->field_name === 'usia')
+                                <i class="fas fa-birthday-cake"></i>
+                            @elseif($data->field_type === 'textarea')
+                                <i class="fas fa-align-left"></i>
+                            @elseif($data->eventFormField->field_name === 'nama_lengkap')
+                                <i class="fas fa-user"></i>
+                            @elseif($data->eventFormField->field_name === 'instansi')
+                                <i class="fas fa-building"></i>
+                            @elseif($data->eventFormField->field_name === 'motivasi')
+                                <i class="fas fa-heart"></i>
                             @else
-                                <i class="fas fa-edit"></i>
+                                <i class="fas fa-question-circle"></i>
                             @endif
                         </div>
                         <div class="form-data-content">
-                            <div class="form-data-label-inline">{{ $data->field_label }}</div>
-                            <div class="form-data-value-inline">
+                            <div class="form-data-label-inline">
+                                <strong>{{ $data->field_label }}:</strong>
                                 @if($data->field_type === 'file' && $data->field_value)
                                     <a href="{{ Storage::url($data->field_value) }}" target="_blank" class="file-link">
                                         <i class="fas fa-download me-2"></i>View File
                                     </a>
                                 @else
-                                    {{ $data->field_value ?: 'Not provided' }}
+                                    {{ $data->field_value ?: 'Tidak dijawab' }}
                                 @endif
                             </div>
                         </div>
@@ -1117,26 +1139,16 @@ use Illuminate\Support\Facades\Storage;
                                         {{ ucfirst($registration->payment->payment_status) }}
                                     </span>
                                     
+                                    <!-- Auto-confirmation system: No manual buttons needed -->
                                     <div class="payment-actions ms-3">
-                                        @if($registration->payment->payment_status === 'pending')
-                                            <button class="btn btn-sm btn-success me-2" title="Verify Payment" onclick="updatePaymentStatus({{ $registration->payment->id }}, 'verified')" style="padding: 4px 8px; font-size: 12px;">
-                                                <i class="fas fa-check me-1"></i>Verify
-                                            </button>
-                                            <button class="btn btn-sm btn-danger me-2" title="Reject Payment" onclick="updatePaymentStatus({{ $registration->payment->id }}, 'rejected')" style="padding: 4px 8px; font-size: 12px;">
-                                                <i class="fas fa-times me-1"></i>Reject
-                                            </button>
-                                        @endif
-                                        
-                                        @if(in_array($registration->payment->payment_status, ['verified', 'lunas']))
-                                            @if($registration->payment->email_sent)
-                                                <button class="btn btn-sm btn-secondary" disabled title="Email Already Sent" style="padding: 4px 8px; font-size: 12px;">
-                                                    <i class="fas fa-envelope-open me-1"></i>Email Sent
-                                                </button>
-                                            @else
-                                                <button class="btn btn-sm btn-primary" title="Send Email Approval" onclick="sendEmailApproval({{ $registration->payment->id }})" style="padding: 4px 8px; font-size: 12px;">
-                                                    <i class="fas fa-envelope me-1"></i>Send Email
-                                                </button>
-                                            @endif
+                                        @if($registration->payment->email_sent)
+                                            <span class="badge bg-success" style="font-size: 11px;">
+                                                <i class="fas fa-envelope-open me-1"></i>Email Sent
+                                            </span>
+                                        @elseif($registration->payment->payment_status === 'lunas')
+                                            <span class="badge bg-info" style="font-size: 11px;">
+                                                <i class="fas fa-clock me-1"></i>Auto Confirmed
+                                            </span>
                                         @endif
                                     </div>
                                 </div>
@@ -1250,151 +1262,8 @@ use Illuminate\Support\Facades\Storage;
         }
     }
     
-    // Update payment status function with enhanced error handling
-    function updatePaymentStatus(paymentId, status) {
-        if (confirm(`Apakah Anda yakin ingin mengubah status pembayaran menjadi ${status}?`)) {
-            console.log('Sending request to:', `/admin/payments/${paymentId}/status`);
-            console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-            
-            // Show loading state
-            const buttons = document.querySelectorAll(`[onclick*="updatePaymentStatus(${paymentId}"]`);
-            buttons.forEach(btn => {
-                btn.disabled = true;
-                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-            });
-            
-            // Create form data with method spoofing for better hosting compatibility
-            const formData = new FormData();
-            formData.append('_method', 'PUT');
-            formData.append('_token', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
-            formData.append('status', status);
-            
-            // Debug: Log formData contents
-            console.log('fetch URL:', `/admin/payments/${paymentId}/status`);
-            console.log('formData contents:', Array.from(formData.entries()));
-            console.log('Request method: POST with _method spoofing to PUT');
-            
-            // Try fetch first, fallback to form submission if needed
-            fetch(`/admin/payments/${paymentId}/status`, {
-                method: 'POST',
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Cache-Control': 'no-cache'
-                },
-                body: formData
-            })
-            .then(response => {
-                console.log('Response status:', response.status);
-                console.log('Response headers:', response.headers);
-                
-                // If 405 Method Not Allowed, try fallback form submission
-                if (response.status === 405) {
-                    console.log('405 error detected, trying fallback form submission');
-                    return submitViaForm(paymentId, status);
-                }
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status} - ${response.statusText}`);
-                }
-                
-                return response.json();
-            })
-            .then(data => {
-                // Handle both direct response and fallback response
-                if (data === 'FORM_SUBMITTED') {
-                    showAlert('Status pembayaran berhasil diperbarui!', 'success');
-                    setTimeout(() => location.reload(), 1500);
-                    return;
-                }
-                console.log('Response data:', data);
-                if (data.success) {
-                    showAlert('success', data.message || 'Status pembayaran berhasil diupdate!');
-                    setTimeout(() => {
-                        location.reload();
-                    }, 1000);
-                } else {
-                    showAlert('error', data.message || 'Terjadi kesalahan!');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                
-                // Reset button state
-                buttons.forEach(btn => {
-                    btn.disabled = false;
-                    btn.innerHTML = btn.classList.contains('btn-success') ? 
-                        '<i class="fas fa-check"></i> Verify' : 
-                        '<i class="fas fa-times"></i> Reject';
-                });
-                
-                // If fetch fails completely, try form fallback
-                if (error.message.includes('405') || error.message.includes('Method Not Allowed')) {
-                    console.log('Trying form fallback due to method error');
-                    submitViaForm(paymentId, status);
-                } else {
-                    showAlert('error', 'Terjadi kesalahan saat mengupdate status pembayaran!');
-                }
-            });
-        }
-    }
-    
-    // Fallback form submission for hosting compatibility
-    function submitViaForm(paymentId, status) {
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/payments/${paymentId}/status`;
-        form.style.display = 'none';
-        
-        // Add CSRF token
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = '_token';
-        csrfInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        form.appendChild(csrfInput);
-        
-        // Add method spoofing
-        const methodInput = document.createElement('input');
-        methodInput.type = 'hidden';
-        methodInput.name = '_method';
-        methodInput.value = 'PUT';
-        form.appendChild(methodInput);
-        
-        // Add status
-        const statusInput = document.createElement('input');
-        statusInput.type = 'hidden';
-        statusInput.name = 'status';
-        statusInput.value = status;
-        form.appendChild(statusInput);
-        
-        document.body.appendChild(form);
-        form.submit();
-        
-        return Promise.resolve('FORM_SUBMITTED');
-    }
-
-    // Send email approval function
-    function sendEmailApproval(paymentId) {
-        if (!confirm('Apakah Anda yakin ingin mengirim email approval ke user?')) {
-            return;
-        }
-        
-        // Create form for email sending
-        const form = document.createElement('form');
-        form.method = 'POST';
-        form.action = `/admin/payments/${paymentId}/send-email`;
-        form.style.display = 'none';
-        
-        // Add CSRF token
-        const csrfInput = document.createElement('input');
-        csrfInput.type = 'hidden';
-        csrfInput.name = '_token';
-        csrfInput.value = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-        form.appendChild(csrfInput);
-        
-        document.body.appendChild(form);
-        form.submit();
-    }
+    // Auto-confirmation system: Manual functions removed
+    // Payment status and email approval are now handled automatically
 
     // Show alert function
     function showAlert(type, message) {

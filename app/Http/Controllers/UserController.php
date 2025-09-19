@@ -285,6 +285,9 @@ class UserController extends Controller
                 'payment_status' => 'lunas', // Auto set to 'lunas' when payment proof uploaded
                 'paid_at' => now()
             ]);
+            
+            // Auto confirm registration when payment proof is uploaded
+            $registration->update(['status' => 'confirmed']);
         }
 
         // Send email notification for registration confirmation
