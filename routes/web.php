@@ -103,3 +103,22 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         return response()->json(['status' => 'ok', 'time' => now()]);
     })->name('session.ping');
 });
+
+// Fallback route for hosting compatibility
+Route::fallback(function () {
+    // Check if it's an admin route
+    if (request()->is('admin/*')) {
+        return redirect()->route('admin.dashboard');
+    }
+    
+    // Check if it's an API-like request
+    if (request()->expectsJson()) {
+        return response()->json([
+            'error' => 'Route not found',
+            'message' => 'The requested route does not exist.'
+        ], 404);
+    }
+    
+    // Redirect to home for other requests
+    return redirect()->route('home');
+});
