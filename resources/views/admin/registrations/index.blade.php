@@ -105,6 +105,17 @@ use Illuminate\Support\Facades\Storage;
         color: #fff;
     }
     
+    .btn-confirm {
+        background: linear-gradient(135deg, #28a745, #20c997);
+        color: #fff;
+    }
+    
+    .btn-confirm:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+        background: linear-gradient(135deg, #20c997, #28a745);
+    }
+    
     .btn-action:hover {
         transform: translateY(-2px);
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
@@ -305,10 +316,15 @@ use Illuminate\Support\Facades\Storage;
                         <button class="btn btn-action btn-view" title="View Details" onclick="viewRegistration({{ $registration->id }})">
                             <i class="fas fa-eye"></i>
                         </button>
+                        @if($registration->status !== 'confirmed')
+                        <button class="btn btn-action btn-confirm" title="Confirm Registration" onclick="updateStatus({{ $registration->id }}, 'confirmed')">
+                            <i class="fas fa-check"></i>
+                        </button>
+                        @endif
                         @if($registration->user->email)
                                         <button class="btn btn-action btn-email" title="Send Email Notification" onclick="sendEmailNotification({{ json_encode($registration->user->email) }}, {{ json_encode($registration->user->name) }}, {{ json_encode($registration->event->title) }}, {{ json_encode($registration->status) }}, {{ $registration->id }})" style="background: linear-gradient(135deg, #007bff, #0056b3); color: white; border: none; margin: 0 2px;">
-                                            <i class="fas fa-envelope"></i>
-                                        </button>
+                            <i class="fas fa-envelope"></i>
+                        </button>
                         @endif
                         <button class="btn btn-action btn-delete" title="Delete" onclick="deleteRegistration({{ $registration->id }})">
                             <i class="fas fa-trash"></i>
@@ -400,35 +416,51 @@ use Illuminate\Support\Facades\Storage;
 
     function updateStatus(id, status) {
         if (confirm(`Apakah Anda yakin ingin mengubah status menjadi ${status}?`)) {
+            console.log('Sending request to:', `/admin/registrations/${id}/status`);
+            console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            
             fetch(`/admin/registrations/${id}/status`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
                 },
                 body: JSON.stringify({ status: status })
             })
             .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
                 if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
+                    return response.text().then(text => {
+                        console.error('Error response:', text);
+                        throw new Error(`HTTP error! Status: ${response.status} - ${text}`);
+                    });
                 }
+                
                 const contentType = response.headers.get('content-type');
                 if (contentType && contentType.includes('application/json')) {
                     return response.json();
                 } else {
-                    throw new Error('Response is not JSON');
+                    return response.text().then(text => {
+                        console.log('Non-JSON response:', text);
+                        throw new Error('Response is not JSON: ' + text);
+                    });
                 }
             })
             .then(data => {
+                console.log('Success response:', data);
                 if (data.success) {
-                    location.reload();
+                    showAlert('success', 'Status berhasil diupdate!');
+                    setTimeout(() => location.reload(), 1000);
                 } else {
-                    alert('Gagal mengupdate status');
+                    showAlert('error', data.message || 'Gagal mengupdate status');
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Terjadi kesalahan');
+                console.error('Error details:', error);
+                showAlert('error', 'Terjadi kesalahan: ' + error.message);
             });
         }
     }

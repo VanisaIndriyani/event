@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="csrf-token" content="test-token">
+    <title>Test Update Status Function</title>
+</head>
+<body>
+    <h1>Test Update Status Function</h1>
+    <button onclick="testUpdateStatus()">Test Update Status</button>
+    <div id="result"></div>
+
+    <script>
+        function updateStatus(id, status) {
+            console.log('updateStatus called with:', id, status);
+            if (confirm(`Apakah Anda yakin ingin mengubah status menjadi ${status}?`)) {
+                fetch(`/admin/registrations/${id}/status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                    },
+                    body: JSON.stringify({ status: status })
+                })
+                .then(response => {
+                    console.log('Response status:', response.status);
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        return response.json();
+                    } else {
+                        throw new Error('Response is not JSON');
+                    }
+                })
+                .then(data => {
+                    console.log('Success data:', data);
+                    if (data.success) {
+                        document.getElementById('result').innerHTML = '<p style="color: green;">Status berhasil diupdate!</p>';
+                        // location.reload(); // Commented out for testing
+                    } else {
+                        document.getElementById('result').innerHTML = '<p style="color: red;">Gagal mengupdate status</p>';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    document.getElementById('result').innerHTML = '<p style="color: red;">Terjadi kesalahan: ' + error.message + '</p>';
+                });
+            }
+        }
+
+        function testUpdateStatus() {
+            console.log('Testing updateStatus function...');
+            updateStatus(1, 'confirmed');
+        }
+    </script>
+</body>
+</html>

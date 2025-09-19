@@ -1086,11 +1086,21 @@ use Illuminate\Support\Facades\Storage;
                             </div>
                             <div class="payment-details">
                                 <div class="payment-label">Payment Status</div>
-                                <div class="payment-value">
+                                <div class="payment-value d-flex align-items-center justify-content-between">
                                     <span class="payment-badge payment-{{ $registration->payment->payment_status }}">
                                         <i class="fas fa-circle me-1"></i>
                                         {{ ucfirst($registration->payment->payment_status) }}
                                     </span>
+                                    @if($registration->payment->payment_status === 'pending')
+                                    <div class="payment-actions ms-3">
+                                        <button class="btn btn-sm btn-success me-2" title="Verify Payment" onclick="updatePaymentStatus({{ $registration->payment->id }}, 'verified')" style="padding: 4px 8px; font-size: 12px;">
+                                            <i class="fas fa-check me-1"></i>Verify
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" title="Reject Payment" onclick="updatePaymentStatus({{ $registration->payment->id }}, 'rejected')" style="padding: 4px 8px; font-size: 12px;">
+                                            <i class="fas fa-times me-1"></i>Reject
+                                        </button>
+                                    </div>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -1146,29 +1156,7 @@ use Illuminate\Support\Facades\Storage;
                         </div>
                         @endif
                         
-                        <!-- Payment Actions -->
-                        @if($registration->payment->payment_status === 'pending')
-                        <div class="payment-actions mt-4">
-                            <div class="d-grid gap-2">
-                                <form action="{{ route('admin.payments.updateStatus', $registration->payment->id) }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    @method('PUT')
-                                    <input type="hidden" name="status" value="verified">
-                                    <button type="submit" class="btn btn-success" onclick="return confirm('Are you sure you want to verify this payment?')">
-                                        <i class="fas fa-check me-2"></i>Verify Payment
-                                    </button>
-                                </form>
-                                <form action="{{ route('admin.payments.updateStatus', $registration->payment->id) }}" method="POST" style="display: inline;">
-                                    @csrf
-                                    @method('PUT')
-                                    <input type="hidden" name="status" value="rejected">
-                                    <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to reject this payment?')">
-                                        <i class="fas fa-times me-2"></i>Reject Payment
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
-                        @endif
+                       
                     @else
                         <div class="payment-item">
                             <div class="payment-icon">
@@ -1224,6 +1212,70 @@ use Illuminate\Support\Facades\Storage;
         }
     }
     
+    // Update payment status function
+    function updatePaymentStatus(paymentId, status) {
+        if (confirm(`Apakah Anda yakin ingin mengubah status pembayaran menjadi ${status}?`)) {
+            console.log('Sending request to:', `/admin/payments/${paymentId}/status`);
+            console.log('CSRF Token:', document.querySelector('meta[name="csrf-token"]').getAttribute('content'));
+            
+            fetch(`/admin/payments/${paymentId}/status`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ status: status })
+            })
+            .then(response => {
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Response data:', data);
+                if (data.success) {
+                    showAlert('success', data.message || 'Status pembayaran berhasil diupdate!');
+                    setTimeout(() => {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    showAlert('error', data.message || 'Terjadi kesalahan!');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showAlert('error', 'Terjadi kesalahan saat mengupdate status pembayaran!');
+            });
+        }
+    }
+
+    // Show alert function
+    function showAlert(type, message) {
+        // Remove existing alerts
+        const existingAlerts = document.querySelectorAll('.alert-custom');
+        existingAlerts.forEach(alert => alert.remove());
+        
+        // Create new alert
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show alert-custom`;
+        alertDiv.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+        alertDiv.innerHTML = `
+            <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'} me-2"></i>
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        document.body.appendChild(alertDiv);
+        
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (alertDiv.parentNode) {
+                alertDiv.remove();
+            }
+        }, 5000);
+    }
+
     // Session keep-alive (ping every 5 minutes)
     setInterval(function() {
         fetch('/admin/ping', {
