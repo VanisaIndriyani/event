@@ -606,6 +606,12 @@
                         </a>
                     </div>
                     <div class="nav-item">
+                        <a href="{{ route('admin.portfolios.index') }}" class="nav-link {{ request()->routeIs('admin.portfolios.*') ? 'active' : '' }}">
+                            <i class="fas fa-images"></i>
+                            Portfolio
+                        </a>
+                    </div>
+                    <div class="nav-item">
                         <a href="{{ route('admin.collaborations.index') }}" class="nav-link {{ request()->routeIs('admin.collaborations.*') ? 'active' : '' }}">
                             <i class="fas fa-handshake"></i>
                             Collaborations

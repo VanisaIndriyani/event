@@ -7,6 +7,7 @@ use App\Http\Controllers\AdminController;
 use App\Http\Controllers\Admin\EventFormController;
 use App\Http\Controllers\Admin\FormFieldController;
 use App\Http\Controllers\Admin\PaymentController;
+use App\Http\Controllers\Admin\PortfolioController;
 
 
 // Public routes
@@ -83,6 +84,9 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('/registrations/{registration}', [AdminController::class, 'showRegistration'])->name('registrations.show');
     Route::put('/registrations/{registration}/status', [AdminController::class, 'updateRegistrationStatus'])->name('registrations.status');
     Route::delete('/registrations/{registration}', [AdminController::class, 'deleteRegistration'])->name('registrations.destroy');
+    
+    // Portfolio management
+    Route::resource('portfolios', PortfolioController::class);
     
     // Payment management
     Route::put('/payments/{payment}/status', [PaymentController::class, 'updateStatus'])->name('payments.status');

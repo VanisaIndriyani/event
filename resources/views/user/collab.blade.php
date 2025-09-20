@@ -298,58 +298,7 @@
         margin-top: 0.5rem;
     }
     
-    .contact-info {
-        background: var(--glass-bg);
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 20px;
-        padding: 2rem;
-        text-align: center;
-    }
-    
-    .contact-title {
-        font-family: 'Orbitron', monospace;
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--text-light);
-        margin-bottom: 1rem;
-    }
-    
-    .contact-methods {
-        display: flex;
-        justify-content: center;
-        gap: 2rem;
-        flex-wrap: wrap;
-    }
-    
-    .contact-method {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.5rem;
-        text-decoration: none;
-        color: var(--text-gray);
-        transition: all 0.3s ease;
-        padding: 1rem;
-        border-radius: 12px;
-    }
-    
-    .contact-method:hover {
-        color: var(--accent-blue);
-        background: rgba(59, 130, 246, 0.1);
-        text-decoration: none;
-        transform: translateY(-2px);
-    }
-    
-    .contact-method i {
-        font-size: 2rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    .contact-method span {
-        font-size: 0.9rem;
-        font-weight: 500;
-    }
+
     
     @media (max-width: 768px) {
         .page-title {
@@ -367,11 +316,6 @@
         
         .checkbox-group {
             grid-template-columns: 1fr;
-        }
-        
-        .contact-methods {
-            flex-direction: column;
-            gap: 1rem;
         }
         
         .collaboration-info,
@@ -585,25 +529,6 @@
                         <i class="fas fa-rocket me-2"></i>Send Collaboration Request
                     </button>
                 </form>
-            </div>
-        </div>
-        
-        <!-- Contact Info -->
-        <div class="contact-info">
-            <h3 class="contact-title">Prefer Direct Contact?</h3>
-            <div class="contact-methods">
-                <a href="mailto:collaborate@epicevents.com" class="contact-method">
-                    <i class="fas fa-envelope"></i>
-                    <span>collaborate@epicevents.com</span>
-                </a>
-                <a href="https://wa.me/6281234567890" class="contact-method" target="_blank">
-                    <i class="fab fa-whatsapp"></i>
-                    <span>+62 812-3456-7890</span>
-                </a>
-                <a href="tel:+6281234567890" class="contact-method">
-                    <i class="fas fa-phone"></i>
-                    <span>+62 812-3456-7890</span>
-                </a>
             </div>
         </div>
     </div>

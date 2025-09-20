@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\EventFormField;
+use App\Models\Portfolio;
 
 class Event extends Model
 {
@@ -38,6 +39,11 @@ class Event extends Model
     public function formFields()
     {
         return $this->hasMany(EventFormField::class);
+    }
+
+    public function portfolio()
+    {
+        return $this->hasOne(Portfolio::class);
     }
 
     public function activeFormFields()

@@ -428,5 +428,108 @@
     </script>
     
     @stack('scripts')
+    
+    <!-- Footer Contact Section -->
+    <footer class="contact-footer">
+        <div class="container">
+            <div class="contact-info">
+                <h3 class="contact-title">Prefer Direct Contact?</h3>
+                <div class="contact-methods">
+                    <a href="mailto:support@lark.today" class="contact-method">
+                        <i class="fas fa-envelope"></i>
+                        <span>support@lark.today</span>
+                    </a>
+                    <a href="https://instagram.com/lark_fest" class="contact-method" target="_blank">
+                        <i class="fab fa-instagram"></i>
+                        <span>@lark_fest</span>
+                    </a>
+                    <a href="https://tiktok.com/@lark_fest" class="contact-method" target="_blank">
+                        <i class="fab fa-tiktok"></i>
+                        <span>@lark_fest</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <style>
+    .contact-footer {
+        background: var(--glass-bg);
+        backdrop-filter: blur(15px);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+        padding: 2rem 0;
+        margin-top: 3rem;
+    }
+    
+    .contact-footer .contact-info {
+        text-align: center;
+    }
+    
+    .contact-footer .contact-title {
+        font-family: 'Orbitron', monospace;
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-light);
+        margin-bottom: 1.5rem;
+        background: var(--gradient-accent);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .contact-footer .contact-methods {
+        display: flex;
+        justify-content: center;
+        gap: 2rem;
+        flex-wrap: wrap;
+    }
+    
+    .contact-footer .contact-method {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        text-decoration: none;
+        color: var(--text-gray);
+        transition: all 0.3s ease;
+        padding: 1rem;
+        border-radius: 12px;
+        min-width: 150px;
+    }
+    
+    .contact-footer .contact-method:hover {
+        color: var(--bright-blue);
+        background: rgba(59, 130, 246, 0.1);
+        text-decoration: none;
+        transform: translateY(-2px);
+    }
+    
+    .contact-footer .contact-method i {
+        font-size: 2rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .contact-footer .contact-method span {
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+    
+    @media (max-width: 768px) {
+        .contact-footer .contact-methods {
+            flex-direction: column;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .contact-footer .contact-method {
+            min-width: 200px;
+        }
+        
+        .contact-footer {
+            padding: 1.5rem 0;
+            margin-top: 2rem;
+        }
+    }
+    </style>
 </body>
 </html>

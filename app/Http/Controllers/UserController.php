@@ -393,9 +393,9 @@ class UserController extends Controller
 
     public function portfolio()
     {
-        $pastEvents = Event::where('event_date', '<', now())
-            ->where('is_active', true)
-            ->orderBy('event_date', 'desc')
+        $pastEvents = \App\Models\Portfolio::where('status', 'published')
+            ->with('event')
+            ->orderBy('created_at', 'desc')
             ->paginate(12);
 
         return view('user.portfolio', compact('pastEvents'));

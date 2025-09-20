@@ -50,6 +50,12 @@ use Illuminate\Support\Facades\Storage;
         overflow: hidden;
     }
     
+    /* Table Responsive - Bootstrap Style */
+    .table-responsive {
+        border-radius: 15px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    
     .table-futuristic th {
         background: linear-gradient(135deg, #1e3c72, #2a5298);
         color: #fff;
@@ -248,7 +254,8 @@ use Illuminate\Support\Facades\Storage;
 
     <!-- Registrations Table -->
     <div class="table-futuristic">
-        <table class="table table-hover mb-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
             <thead>
                 <tr>
                     <th>No</th>
@@ -341,6 +348,7 @@ use Illuminate\Support\Facades\Storage;
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 
     <!-- Pagination -->

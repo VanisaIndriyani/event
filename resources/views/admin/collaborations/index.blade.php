@@ -387,10 +387,7 @@
                                            class="btn btn-sm btn-info">
                                             <i class="fas fa-eye"></i>
                                         </a>
-                                        <button type="button" class="btn btn-sm btn-danger" 
-                                                onclick="deleteCollaboration({{ $collaboration->id }})">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                       
                                     </div>
                                 </td>
                             </tr>
